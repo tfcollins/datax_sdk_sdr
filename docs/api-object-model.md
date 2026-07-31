@@ -42,13 +42,14 @@ classDiagram
         get_caps()
     }
     class datax_stream {
-        start() / start_at(time)
+        start()
+        start_at(time)
         recv(block, timeout)
         send(block, timeout)
         stop()
     }
     class datax_sched {
-        at(time) builders
+        queue_at(time)
         commit()
         wait(seq, timeout)
         get_completions()

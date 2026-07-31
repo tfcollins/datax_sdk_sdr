@@ -10,6 +10,18 @@
  *   2. OS-level "prefers dark" preference   — picked up via @media
  */
 
+/*
+ * adi_doctools gives dark-mode SVGs a white card unless they are
+ * .no-background or .flowchart. Mermaid only tags flowcharts with
+ * .flowchart, so sequence/class/gantt diagrams — which doctools already
+ * renders with the mermaid dark theme — would sit light-on-white.
+ * Keep every mermaid SVG transparent instead.
+ */
+body.dark pre.mermaid > svg,
+body.dark .mermaid-container svg {
+    background: transparent !important;
+}
+
 img.only-dark {
     display: none;
 }
