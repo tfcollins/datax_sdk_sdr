@@ -1,0 +1,34 @@
+/*
+ * Theme-aware image swapping for PNGs that have separate light + dark
+ * variants. Pages add :class: only-light and :class: only-dark to the
+ * Sphinx .. image:: directive; this CSS hides whichever one is wrong
+ * for the active theme.
+ *
+ * Activation paths:
+ *
+ *   1. Manual cosmic-theme toggle           — sets body.dark
+ *   2. OS-level "prefers dark" preference   — picked up via @media
+ */
+
+img.only-dark {
+    display: none;
+}
+img.only-light {
+    display: inline-block;
+}
+
+body.dark img.only-light {
+    display: none;
+}
+body.dark img.only-dark {
+    display: inline-block;
+}
+
+@media (prefers-color-scheme: dark) {
+    body:not(.light) img.only-light {
+        display: none;
+    }
+    body:not(.light) img.only-dark {
+        display: inline-block;
+    }
+}

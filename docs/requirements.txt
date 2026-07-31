@@ -1,0 +1,4 @@
+sphinx>=7
+sphinxcontrib-mermaid
+myst-parser
+adi-doctools @ https://github.com/analogdevicesinc/doctools/releases/download/latest/adi-doctools.tar.gz
