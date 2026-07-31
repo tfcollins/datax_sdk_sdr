@@ -1,9 +1,130 @@
 # Python Bindings
 
-Binding strategy, C-to-Python mapping, idioms, and worked examples.
+The Python package `datax` wraps `libdatax` the way pylibiio wraps
+libiio, then adds pyadi-iio-style ergonomics on top. Python is the
+primary integration surface for v1 ({doc}`non-goals` — no GNU Radio
+blocks yet).
 
-```{admonition} Stub
-:class: warning
+## Binding strategy
 
-Content lands in a later authoring phase — see the repository plan.
+- **ctypes (or cffi) over the C ABI** — no compiled extension module;
+  the wheel is pure Python and tracks `libdatax.so` versioning, exactly
+  the pylibiio model.
+- **numpy at the edges** — sample blocks cross the boundary as
+  `numpy.complex64` arrays (int16 I/Q converted at the edge; a raw int16
+  path exists for throughput-critical code).
+- **properties over methods** — pyadi-iio muscle memory:
+  `dev.rx_lo = 2.4e9`, not `dev.set_frequency(...)`.
+- **context managers** — every object is a `with`-able; teardown order
+  follows the C ownership rules.
+
+## C → Python mapping
+
+| C | Python | Notes |
+|---|---|---|
+| `datax_context` | `datax.Context(uri)` | `Context()` = local |
+| `datax_device` | `datax.Device` | `ctx.devices[i]` |
+| `datax_stream` | `datax.RxStream` / `datax.TxStream` | `dev.rx_stream(...)`, `dev.tx_stream(...)` |
+| `datax_sched` | `datax.Scheduler` | `dev.scheduler` (lazy, caps-gated) |
+| `datax_caps` | `datax.Capabilities` | `dev.caps`, supports `in` |
+| `datax_time` | `int` ticks + `dev.time` helpers | `dev.time.now`, `dev.time.seconds(x)` |
+| negative errno | `datax.Error` subclasses | `LateError`, `OverflowError`, `CapabilityError` |
+| event callback | `ctx.on_event(fn)` | delivered on a Python thread |
+
+Convenience layer (matching pyadi-iio):
+
+- `dev.rx()` — one-shot capture returning `(samples, timestamp)`;
+- `dev.tx(data)` — one-shot or cyclic transmit;
+- `dev.rx_lo`, `dev.tx_lo`, `dev.rx_gain`, `dev.sample_rate`,
+  `dev.rx_bandwidth` properties.
+
+## Timed-command builder
+
+`sched.at(t)` returns a builder whose calls queue descriptors; `commit()`
+submits the batch ({doc}`api-c-core`):
+
+```python
+sched = dev.scheduler
+t0 = dev.time.now + dev.time.seconds(0.5)
+
+for i, f in enumerate(hop_plan):
+    sched.at(t0 + i * dwell).tune(f)
+sched.at(t0).marker(line=0)          # scope-visible start edge
+sched.commit()
+sched.wait_all(timeout=2.0)          # raises LateError on any late hop
+```
+
+## Worked examples (spec-level)
+
+These are the acceptance examples for the API design — they must read
+this cleanly, or the API is wrong. They become runnable in roadmap P3/P4.
+
+### Timed capture at the next PPS
+
+```python
+import datax
+
+with datax.Context("ip:analog.local") as ctx:
+    dev = ctx.devices[0]
+    dev.rx_lo = 2.4e9
+    dev.sample_rate = 30.72e6
+
+    dev.time.align_next_pps(epoch=0)          # device time = 0 at PPS edge
+    with dev.rx_stream(channels=[0], block_samples=65536) as rx:
+        rx.start_at(dev.time.seconds(1.0))    # exactly 1 s after the edge
+        samples, ts = rx.recv()
+        assert ts == dev.time.seconds(1.0)    # first sample is tick-exact
+```
+
+### Phase-coherent dual-chip capture (ADRV9009-ZU11EG)
+
+```python
+with datax.Context("ip:zu11eg.local") as ctx:
+    dev = ctx.devices[0]                      # dual ADRV9009 = one device
+    if "mcs" not in dev.caps:
+        raise SystemExit("needs DATAX_CAP_MCS")
+
+    dev.run_mcs()                             # coherence gate — see timing docs
+    assert "phase_coherent" in dev.caps       # live state, true only post-MCS
+
+    with dev.rx_stream(channels=[0, 1, 2, 3]) as rx:   # spans both chips
+        rx.start_at(dev.time.now + dev.time.seconds(0.1))
+        samples, ts = rx.recv()               # (4, N) complex64, one timestamp
+```
+
+### Frequency-hop scan (ADRV9361-Z7035, fastlock)
+
+```python
+with datax.Context("ip:z7035.local") as ctx:
+    dev = ctx.devices[0]
+    plan = [2.40e9, 2.42e9, 2.44e9, 2.46e9]  # ≤ 8: fastlock profile limit
+    dev.stage_hop_table(plan)                 # untimed, milliseconds — do it early
+
+    sched, dwell = dev.scheduler, dev.time.seconds(0.005)
+    t0 = dev.time.now + dev.time.seconds(0.5)
+    with dev.rx_stream(channels=[0], block_samples=16384) as rx:
+        for i, f in enumerate(plan):
+            sched.at(t0 + i * dwell).tune(f)
+        sched.commit()
+        rx.start_at(t0)                       # capture spans the whole scan
+        blocks = [rx.recv() for _ in plan]
+    sched.wait_all()                          # every hop confirmed on time
+```
+
+## Error handling idioms
+
+```python
+try:
+    rx.start_at(dev.time.now)                 # inside the guard margin
+except datax.LateError as e:
+    print(e.requested, e.margin)              # explicit, never a shifted capture
+```
+
+`Capabilities` supports feature-gating without board names:
+
+```python
+if "timed_commands" in dev.caps:
+    schedule_hops(dev)
+else:
+    fallback_immediate(dev)                   # same code path, degraded timing
 ```

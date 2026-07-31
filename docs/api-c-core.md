@@ -1,9 +1,205 @@
 # C Core API Reference
 
-Prototype-level specification of libdatax: context, device, stream, scheduler, and event objects.
+Prototype-level specification of `libdatax`. Semantics follow the
+{doc}`api-object-model`; this page is the contract implementations are
+written against ({doc}`requirements-documentation`: every public symbol
+appears here before it is implemented).
 
-```{admonition} Stub
-:class: warning
+Conventions: all functions return `int` (0 or negative errno) unless a
+handle or count is the documented return; all handles are opaque; `ch`
+arguments are channel indices, `mask` arguments are channel bitmasks.
 
-Content lands in a later authoring phase — see the repository plan.
+## Context
+
+```c
+int  datax_context_create_from_uri(const char *uri, struct datax_context **ctx);
+int  datax_context_create_local(struct datax_context **ctx);
+void datax_context_destroy(struct datax_context *ctx);
+
+unsigned int datax_context_get_device_count(const struct datax_context *ctx);
+int  datax_context_get_device(struct datax_context *ctx, unsigned int index,
+                              struct datax_device **dev);
+
+struct iio_context *datax_context_get_iio_context(struct datax_context *ctx);
+const char *datax_context_get_last_error(const struct datax_context *ctx);
+int  datax_context_get_version(const struct datax_context *ctx,
+                               unsigned int *major, unsigned int *minor);
 ```
+
+`create_from_uri` accepts any libiio URI (`ip:`, `usb:`, `serial:`,
+`local:`) — the radiohead is remote or local with no other code change.
+Creation runs capability discovery ({doc}`api-object-model`) once and
+caches the result on each device.
+
+## Device
+
+```c
+const char *datax_device_get_name(const struct datax_device *dev);
+const struct datax_caps *datax_device_get_caps(const struct datax_device *dev);
+
+/* Radio functions — 'when' is a device time; DATAX_TIME_NOW = immediate. */
+int datax_device_set_frequency(struct datax_device *dev, unsigned int ch,
+                               unsigned long long hz, datax_time when);
+int datax_device_get_frequency(const struct datax_device *dev, unsigned int ch,
+                               unsigned long long *hz);
+int datax_device_set_gain(struct datax_device *dev, unsigned int ch,
+                          double db, datax_time when);
+int datax_device_get_gain(const struct datax_device *dev, unsigned int ch, double *db);
+int datax_device_set_sample_rate(struct datax_device *dev,
+                                 unsigned long long sps);   /* never timed */
+int datax_device_set_bandwidth(struct datax_device *dev, unsigned int ch,
+                               unsigned long long hz);
+
+/* Hop staging — pre-loads fastlock profiles (Z7035) or the FHM table
+ * (ZU11EG). Milliseconds-scale, never timed; stage before scheduling. */
+int datax_device_stage_hop_table(struct datax_device *dev,
+                                 const unsigned long long *freqs_hz, size_t count);
+
+/* Device time */
+int datax_device_get_time(const struct datax_device *dev,
+                          unsigned long long *ticks, unsigned long long *tick_hz);
+int datax_device_set_time_next_pps(struct datax_device *dev,
+                                   unsigned long long epoch_ticks);
+
+/* Multi-chip sync (DATAX_CAP_MCS) */
+int datax_device_run_mcs(struct datax_device *dev);
+```
+
+A timed `set_frequency` requires a staged hop table containing the target
+frequency; otherwise it returns `-EINVAL` with extended error "frequency
+not staged". This keeps the pre-staged contract explicit rather than
+letting the SDK silently reload profile tables mid-schedule
+({doc}`timing-synchronization`).
+
+## Stream
+
+```c
+struct datax_stream_config {
+    enum datax_direction direction;     /* DATAX_RX or DATAX_TX */
+    unsigned int channel_mask;
+    size_t block_samples;               /* samples per block, per channel */
+    unsigned int block_count;           /* buffers in flight */
+    bool cyclic;                        /* TX: repeat from fabric memory */
+};
+
+int  datax_stream_create(struct datax_device *dev,
+                         const struct datax_stream_config *cfg,
+                         struct datax_stream **stream);
+void datax_stream_destroy(struct datax_stream *stream);
+
+int datax_stream_start(struct datax_stream *stream);
+int datax_stream_start_at(struct datax_stream *stream, datax_time when);
+int datax_stream_stop(struct datax_stream *stream);
+
+/* Copying I/O — interleaved int16 I/Q, host order. */
+int datax_stream_recv(struct datax_stream *stream, void *dst, size_t samples,
+                      struct datax_block_info *info, int timeout_ms);
+int datax_stream_send(struct datax_stream *stream, const void *src, size_t samples,
+                      int timeout_ms);
+
+/* Zero-copy — borrow the mapped block, return it when done. */
+int datax_stream_get_block(struct datax_stream *stream, void **data,
+                           struct datax_block_info *info, int timeout_ms);
+int datax_stream_put_block(struct datax_stream *stream, void *data);
+
+struct datax_block_info {
+    unsigned long long timestamp_ticks; /* first-sample time; 0 if untagged */
+    bool discontinuous;                 /* overflow occurred before this block */
+    size_t valid_samples;
+};
+```
+
+### Arm semantics (the timed-start contract)
+
+`start_at(T)` is implemented as *arm early, release exactly* — the
+`data_offload` block holds the armed DMA until a Tick
+`CAPTURE_ARM`/`TRANSMIT_ARM` pulses its `sync_ext` input at T
+({doc}`streaming-model`). Contractual consequences:
+
+- all buffers are enqueued and the DMA started **before** T; `start_at`
+  fails with `DATAX_ERR_LATE` if T is closer than the guard margin
+  (queryable via caps; default 10 ms);
+- if the arm descriptor is late at dispatch, the stream errors loudly
+  (event + failed start), never a shifted capture;
+- `stop()` on an armed-but-unreleased stream cancels the arm and flushes
+  the descriptor;
+- the first sample of a released RX stream carries timestamp T when the
+  tagger is fitted (`DATAX_CAP_TIMESTAMPS`).
+
+## Scheduler
+
+```c
+int  datax_sched_create(struct datax_device *dev, struct datax_sched **sched);
+void datax_sched_destroy(struct datax_sched *sched);
+
+/* Queue builders — accumulate client-side, in timestamp order. Each
+ * returns a sequence id for completion matching. */
+long datax_sched_queue_gpio(struct datax_sched *sched, datax_time when,
+                            unsigned int mask, unsigned int value);
+long datax_sched_queue_marker(struct datax_sched *sched, datax_time when,
+                              unsigned int line, unsigned int width_ticks);
+long datax_sched_queue_tune(struct datax_sched *sched, datax_time when,
+                            unsigned int ch, unsigned long long hz);
+long datax_sched_queue_stream_gate(struct datax_sched *sched, datax_time when,
+                                   struct datax_stream *stream, bool enable);
+
+int datax_sched_commit(struct datax_sched *sched);
+int datax_sched_flush(struct datax_sched *sched);
+
+int datax_sched_wait(struct datax_sched *sched, long seq, int timeout_ms,
+                     struct datax_completion *out);
+int datax_sched_get_completions(struct datax_sched *sched,
+                                struct datax_completion *out, size_t max,
+                                size_t *count);
+
+struct datax_completion {
+    long seq;
+    enum datax_completion_status status;  /* OK, LATE, DROPPED, FLUSHED */
+    unsigned long long requested_ticks;
+    unsigned long long executed_ticks;
+};
+```
+
+### Abstracting the Tick submission bottleneck
+
+This section exists because the current kernel interface shapes the API.
+Today, the Tick IIO driver accepts **one 48-byte descriptor per sysfs
+attribute write** (a CSV of twelve 32-bit words) and reports completions
+through a **polled one-entry window** with no interrupt. Naive per-call
+submission would bottleneck and lose completions. The SDK therefore:
+
+- **batches** — `queue_*` builders accumulate descriptors client-side,
+  sorted by timestamp; `commit()` writes them back-to-back in one pass,
+  respecting queue-depth headroom from the capability limits;
+- **polls centrally** — one SDK thread drains the completion window into
+  a per-scheduler ring sized to the queue depth, acking each entry;
+  `wait`/`get_completions` read the ring and never race the hardware
+  window;
+- **stays replaceable** — the builder/commit shape is exactly what a
+  future kernel fast path (chardev bulk submit, IRQ-driven completions —
+  a Tick roadmap item) wants. When it lands, `commit()` becomes one
+  ioctl and the poller thread retires, **with no API change**.
+
+Rates that fit this design: hundreds of commands per commit at
+millisecond cadence — hop schedules, TDD frames, capture batches. Not
+per-sample control ({doc}`non-goals`).
+
+## Events
+
+```c
+enum datax_event_type {
+    DATAX_EVT_LATE_COMMAND,
+    DATAX_EVT_QUEUE_OVERFLOW,
+    DATAX_EVT_STREAM_OVERFLOW,
+    DATAX_EVT_STREAM_UNDERFLOW,
+    DATAX_EVT_PPS_LOCK_CHANGE,
+};
+
+typedef void (*datax_event_cb)(const struct datax_event *evt, void *user);
+int datax_context_set_event_callback(struct datax_context *ctx,
+                                     datax_event_cb cb, void *user);
+```
+
+Callbacks fire on the SDK's poller thread and must not block; a NULL
+callback disables delivery (errors remain visible through return codes
+and completions).
