@@ -69,7 +69,9 @@ tick clock vs JESD device clocks).
 ## New work 3 — VITA-49 packetizer (roadmap P6)
 
 The Corundum application-section packetizer specified in
-{doc}`streaming-model`. The ZU11EG is its lead platform: the QSFP+ cage's
+{doc}`streaming-model`, with the full block-level datapath and
+control-plane walk in {doc}`hdl-datapath-corundum`. The ZU11EG is its
+lead platform: the QSFP+ cage's
 lane headroom is the only credible path to native-rate subsets beyond
 10 G.
 

@@ -1,0 +1,225 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="adi-figure no-background"
+     viewBox="0 0 1100 800" width="100%"
+     style="max-width: 1080px; height: auto;">
+  <style>
+    svg.adi-figure {
+      --adi-fill-drv:    #cbd9e8;
+      --adi-fill-mcu:    #f4dca0;
+      --adi-fill-hw:     #f7c8a4;
+      --adi-fill-blank:  #ffffff;
+      --adi-box-stroke:  #c9bfa9;
+      --adi-data:        #c07b3a;
+      --adi-panel-bg:    #f7f1e6;
+      --adi-panel-stroke:#e3dcc9;
+      --adi-datax-bg:    #e4ecf6;
+      --adi-datax-stroke:#b6c4dc;
+      --adi-text-strong: #2b2a26;
+      --adi-text-muted:  #6b6660;
+      --adi-arrow:       #b3aa97;
+      --adi-accent:      #6b8aaa;
+    }
+    @media (prefers-color-scheme: dark) {
+      svg.adi-figure {
+        --adi-fill-drv: #243246; --adi-fill-mcu: #4d402a; --adi-fill-hw: #4d3525;
+        --adi-fill-blank: #14181e; --adi-box-stroke: #4a5260; --adi-data: #d99a5b;
+        --adi-panel-bg: #1a2028;  --adi-panel-stroke: #3a424b;
+        --adi-datax-bg: #1f2a3d;  --adi-datax-stroke: #3a4960;
+        --adi-text-strong: #e5e5e5; --adi-text-muted: #aaaaaa;
+        --adi-arrow: #6a7484;      --adi-accent: #7da3c4;
+      }
+    }
+    body.dark svg.adi-figure {
+      --adi-fill-drv: #243246; --adi-fill-mcu: #4d402a; --adi-fill-hw: #4d3525;
+      --adi-fill-blank: #14181e; --adi-box-stroke: #4a5260; --adi-data: #d99a5b;
+      --adi-panel-bg: #1a2028;  --adi-panel-stroke: #3a424b;
+      --adi-datax-bg: #1f2a3d;  --adi-datax-stroke: #3a4960;
+      --adi-text-strong: #e5e5e5; --adi-text-muted: #aaaaaa;
+      --adi-arrow: #6a7484;      --adi-accent: #7da3c4;
+    }
+    svg.adi-figure .adi-panel { fill: var(--adi-panel-bg); stroke: var(--adi-panel-stroke); stroke-width: 1.25; }
+    svg.adi-figure .adi-datax-band { fill: var(--adi-datax-bg); stroke: var(--adi-datax-stroke); stroke-width: 1.25; }
+    svg.adi-figure .adi-title { font: 600 18px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-strong); }
+    svg.adi-figure .adi-subtitle { font: 13px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .adi-section-label { font: 600 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); letter-spacing: 0.04em; }
+    svg.adi-figure .box { stroke: var(--adi-box-stroke); stroke-width: 1.25; }
+    svg.adi-figure .box-roadmap { fill: var(--adi-fill-blank); stroke: var(--adi-accent); stroke-width: 1.25; stroke-dasharray: 6 4; }
+    svg.adi-figure .box-text { font: 600 13px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-strong); }
+    svg.adi-figure .box-desc { font: 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .arrow { stroke: var(--adi-arrow); stroke-width: 1.5; fill: none; }
+    svg.adi-figure .arrow-ctl { stroke: var(--adi-accent); stroke-width: 1.5; fill: none; }
+    svg.adi-figure .arrow-data { stroke: var(--adi-data); stroke-width: 3; fill: none; }
+    svg.adi-figure .ctl-bus { stroke: var(--adi-accent); stroke-width: 1.5; fill: none; }
+    svg.adi-figure .ctl-tap { fill: var(--adi-accent); }
+    svg.adi-figure .arrowhead-fill { fill: var(--adi-arrow); }
+    svg.adi-figure .arrowhead-ctl { fill: var(--adi-accent); }
+    svg.adi-figure .arrowhead-data { fill: var(--adi-data); }
+    svg.adi-figure .arrow-label { font: italic 10px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .note-text { font: italic 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .accent-text { fill: var(--adi-accent); }
+  </style>
+
+  <defs>
+    <marker id="hd-a" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" class="arrowhead-fill"/>
+    </marker>
+    <marker id="hd-c" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" class="arrowhead-ctl"/>
+    </marker>
+    <marker id="hd-d" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto">
+      <polygon points="0 0, 7 3, 0 6" class="arrowhead-data"/>
+    </marker>
+  </defs>
+
+  <rect x="10" y="10" width="1080" height="780" rx="14" class="adi-panel"/>
+
+  <text x="430" y="38" class="adi-title" text-anchor="middle">Offload datapath — samples stay in the PL, the ARM steers</text>
+  <text x="430" y="58" class="adi-subtitle" text-anchor="middle">ADRV9009-ZU11EG shown · Z7035 mirrors it with LVDS + SFP (new wrapper)</text>
+
+  <!-- legend -->
+  <line x1="790" y1="34" x2="822" y2="34" class="arrow-data"/>
+  <text x="828" y="38" class="note-text">sample data (PL only)</text>
+  <line x1="790" y1="54" x2="822" y2="54" class="arrow-ctl"/>
+  <text x="828" y="58" class="note-text">control (ARM-owned)</text>
+  <rect x="964" y="46" width="14" height="14" rx="3" class="box-roadmap"/>
+  <text x="984" y="58" class="note-text">new HDL</text>
+
+  <!-- ================= RF column ================= -->
+  <text x="130" y="120" class="adi-section-label" text-anchor="middle">RF / CLOCKING</text>
+  <rect x="40" y="140" width="180" height="106" rx="8" class="box" fill="var(--adi-fill-hw)"/>
+  <text x="130" y="164" class="box-text" text-anchor="middle">2× ADRV9009</text>
+  <text x="130" y="184" class="box-desc" text-anchor="middle">4R4T · JESD204B</text>
+  <text x="130" y="200" class="box-desc" text-anchor="middle">Talise FHM hop</text>
+  <text x="130" y="216" class="box-desc" text-anchor="middle">SPI from PS · GPIO from Tick</text>
+
+  <rect x="40" y="280" width="180" height="90" rx="8" class="box" fill="var(--adi-fill-hw)"/>
+  <text x="130" y="304" class="box-text" text-anchor="middle">HMC7044</text>
+  <text x="130" y="324" class="box-desc" text-anchor="middle">device clocks · SYSREF</text>
+  <text x="130" y="340" class="box-desc" text-anchor="middle">SPI from PS</text>
+
+  <!-- ================= PL band ================= -->
+  <text x="520" y="120" class="adi-section-label" text-anchor="middle">PROGRAMMABLE LOGIC (XCZU11EG)</text>
+  <rect x="260" y="128" width="520" height="632" rx="10" class="adi-datax-band"/>
+
+  <!-- data spine -->
+  <rect x="290" y="145" width="220" height="66" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="400" y="169" class="box-text" text-anchor="middle">JESD204B PHY</text>
+  <text x="400" y="187" class="box-desc" text-anchor="middle">GTH quads · profile-set lanes</text>
+
+  <rect x="290" y="230" width="220" height="66" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="400" y="254" class="box-text" text-anchor="middle">JESD204B RX link</text>
+  <text x="400" y="272" class="box-desc" text-anchor="middle">axi_jesd204_rx · SYSREF aligned</text>
+
+  <rect x="290" y="315" width="220" height="66" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="400" y="339" class="box-text" text-anchor="middle">Transport + util_cpack</text>
+  <text x="400" y="357" class="box-desc" text-anchor="middle">sample map · channel select</text>
+
+  <rect x="290" y="400" width="220" height="66" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="400" y="424" class="box-text" text-anchor="middle">tick_stream_timestamp_tag</text>
+  <text x="400" y="442" class="box-desc" text-anchor="middle">in-band device time · gates</text>
+
+  <rect x="290" y="485" width="220" height="66" rx="8" class="box-roadmap"/>
+  <text x="400" y="509" class="box-text accent-text" text-anchor="middle">VITA-49 packetizer</text>
+  <text x="400" y="527" class="box-desc" text-anchor="middle">VRT frames · UDP/IP encap</text>
+
+  <rect x="290" y="570" width="220" height="80" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="400" y="594" class="box-text" text-anchor="middle">Corundum core</text>
+  <text x="400" y="612" class="box-desc" text-anchor="middle">app ingress · TX rings · sched</text>
+  <text x="400" y="628" class="box-desc" text-anchor="middle">MAC / PCS</text>
+
+  <rect x="290" y="670" width="220" height="66" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="400" y="694" class="box-text" text-anchor="middle">10GBASE-R PHY</text>
+  <text x="400" y="712" class="box-desc" text-anchor="middle">GTH serdes · 156.25 MHz ref</text>
+
+  <!-- data arrows down the spine -->
+  <line x1="400" y1="211" x2="400" y2="227" class="arrow-data" marker-end="url(#hd-d)"/>
+  <line x1="400" y1="296" x2="400" y2="312" class="arrow-data" marker-end="url(#hd-d)"/>
+  <line x1="400" y1="381" x2="400" y2="397" class="arrow-data" marker-end="url(#hd-d)"/>
+  <line x1="400" y1="466" x2="400" y2="482" class="arrow-data" marker-end="url(#hd-d)"/>
+  <line x1="400" y1="551" x2="400" y2="567" class="arrow-data" marker-end="url(#hd-d)"/>
+  <line x1="400" y1="650" x2="400" y2="667" class="arrow-data" marker-end="url(#hd-d)"/>
+
+  <!-- RF -> PHY data, HMC clocks -->
+  <line x1="222" y1="185" x2="287" y2="176" class="arrow-data" marker-end="url(#hd-d)"/>
+  <text x="252" y="168" class="arrow-label" text-anchor="middle">JESD lanes</text>
+  <line x1="222" y1="322" x2="287" y2="300" class="arrow" marker-end="url(#hd-a)"/>
+  <text x="252" y="336" class="arrow-label" text-anchor="middle">dev clk · SYSREF</text>
+
+  <!-- control column inside PL -->
+  <rect x="560" y="230" width="200" height="76" rx="8" class="box" fill="var(--adi-fill-drv)"/>
+  <text x="660" y="254" class="box-text" text-anchor="middle">AXI-Lite CSR fabric</text>
+  <text x="660" y="272" class="box-desc" text-anchor="middle">from PS M_AXI_HPM0</text>
+  <text x="660" y="288" class="box-desc" text-anchor="middle">registers only — no samples</text>
+
+  <rect x="560" y="360" width="200" height="92" rx="8" class="box" fill="var(--adi-fill-drv)"/>
+  <text x="660" y="384" class="box-text" text-anchor="middle">Tick scheduler</text>
+  <text x="660" y="402" class="box-desc" text-anchor="middle">axi_timed_command_scheduler</text>
+  <text x="660" y="418" class="box-desc" text-anchor="middle">sync_ext · gates · FHM GPIO</text>
+  <text x="660" y="434" class="box-desc" text-anchor="middle">64-bit device time</text>
+
+  <rect x="560" y="490" width="200" height="86" rx="8" class="box" fill="var(--adi-fill-blank)"/>
+  <text x="660" y="514" class="box-text" text-anchor="middle">MVP DMA path</text>
+  <text x="660" y="532" class="box-desc" text-anchor="middle">data_offload · axi_dmac</text>
+  <text x="660" y="548" class="box-desc" text-anchor="middle">→ PS DDR — bypassed in</text>
+  <text x="660" y="564" class="box-desc" text-anchor="middle">offload mode</text>
+
+  <!-- CSR bus: vertical with taps to each spine block -->
+  <line x1="537" y1="178" x2="537" y2="703" class="ctl-bus"/>
+  <line x1="558" y1="268" x2="537" y2="268" class="ctl-bus"/>
+  <line x1="537" y1="178" x2="514" y2="178" class="ctl-bus"/>
+  <circle cx="537" cy="178" r="3" class="ctl-tap"/>
+  <line x1="537" y1="263" x2="514" y2="263" class="ctl-bus"/>
+  <circle cx="537" cy="263" r="3" class="ctl-tap"/>
+  <line x1="537" y1="348" x2="514" y2="348" class="ctl-bus"/>
+  <circle cx="537" cy="348" r="3" class="ctl-tap"/>
+  <line x1="537" y1="433" x2="514" y2="433" class="ctl-bus"/>
+  <circle cx="537" cy="433" r="3" class="ctl-tap"/>
+  <line x1="537" y1="518" x2="514" y2="518" class="ctl-bus"/>
+  <circle cx="537" cy="518" r="3" class="ctl-tap"/>
+  <line x1="537" y1="603" x2="514" y2="603" class="ctl-bus"/>
+  <circle cx="537" cy="603" r="3" class="ctl-tap"/>
+  <line x1="537" y1="703" x2="514" y2="703" class="ctl-bus"/>
+  <circle cx="537" cy="703" r="3" class="ctl-tap"/>
+  <text x="548" y="740" class="arrow-label accent-text" text-anchor="middle">CSR taps — every stage</text>
+
+  <!-- Tick hard-timed outputs into the spine -->
+  <line x1="558" y1="410" x2="514" y2="418" class="arrow-ctl" marker-end="url(#hd-c)"/>
+  <text x="536" y="404" class="arrow-label accent-text" text-anchor="middle">sync · gate</text>
+
+  <!-- ================= PS / board column ================= -->
+  <text x="945" y="120" class="adi-section-label" text-anchor="middle">PS (ARM) + BOARD</text>
+  <rect x="820" y="140" width="250" height="240" rx="8" class="box" fill="var(--adi-fill-drv)"/>
+  <text x="945" y="164" class="box-text" text-anchor="middle">PS — ARM APU · Linux</text>
+  <text x="945" y="188" class="box-desc" text-anchor="middle">iiod / libiio — remote control</text>
+  <text x="945" y="206" class="box-desc" text-anchor="middle">mqnic driver — rings · doorbells</text>
+  <text x="945" y="224" class="box-desc" text-anchor="middle">adrv9009 · jesd204-fsm drivers</text>
+  <text x="945" y="242" class="box-desc" text-anchor="middle">Tick IIO driver — batched descriptors</text>
+  <text x="945" y="260" class="box-desc" text-anchor="middle">HMC7044 clock driver</text>
+  <text x="945" y="286" class="box-desc" text-anchor="middle">control only — sample frames</text>
+  <text x="945" y="302" class="box-desc" text-anchor="middle">never traverse PS memory</text>
+
+  <rect x="820" y="420" width="250" height="70" rx="8" class="box" fill="var(--adi-fill-drv)"/>
+  <text x="945" y="444" class="box-text" text-anchor="middle">Management Ethernet</text>
+  <text x="945" y="462" class="box-desc" text-anchor="middle">PS GEM — iiod / SSH / telemetry</text>
+  <line x1="945" y1="418" x2="945" y2="384" class="arrow-ctl" marker-end="url(#hd-c)"/>
+
+  <rect x="820" y="670" width="250" height="70" rx="8" class="box" fill="var(--adi-fill-hw)"/>
+  <text x="945" y="694" class="box-text" text-anchor="middle">QSFP+ cage</text>
+  <text x="945" y="712" class="box-desc" text-anchor="middle">10G today · 4-lane headroom</text>
+
+  <!-- PS -> CSR fabric -->
+  <line x1="818" y1="270" x2="763" y2="268" class="arrow-ctl" marker-end="url(#hd-c)"/>
+  <text x="790" y="256" class="arrow-label accent-text" text-anchor="middle">M_AXI_HPM0</text>
+
+  <!-- MVP DMA (grey, bypassed) -->
+  <line x1="762" y1="530" x2="818" y2="370" class="arrow" marker-end="url(#hd-a)" stroke-dasharray="6,4"/>
+
+  <!-- PHY -> QSFP data -->
+  <line x1="512" y1="708" x2="817" y2="706" class="arrow-data" marker-end="url(#hd-d)"/>
+  <text x="664" y="698" class="arrow-label" text-anchor="middle">10GBASE-R</text>
+
+  <!-- SPI control path over the top -->
+  <path d="M 900 138 L 900 92 L 130 92 L 130 137" class="arrow-ctl" fill="none" marker-end="url(#hd-c)"/>
+  <text x="515" y="86" class="arrow-label accent-text" text-anchor="middle">SPI — Talise API · HMC7044 (control only)</text>
+
+  <text x="550" y="778" class="note-text" text-anchor="middle">Invariants: sample data never enters PS DDR in offload mode; every stage is ARM-controlled through CSR/SPI. Dashed grey = MVP DMA path, kept but bypassed.</text>
+</svg>

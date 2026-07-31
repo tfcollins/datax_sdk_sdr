@@ -69,6 +69,7 @@ collateral exists, not proven on silicon), *planned* (documented intent).
    background-prior-art
    architecture-proposal
    streaming-model
+   hdl-datapath-corundum
    timing-synchronization
    non-goals
 

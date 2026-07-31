@@ -120,6 +120,10 @@ numbers) into the NIC datapath.
    :file: _static/images/corundum-vita49-offload.svg
 ```
 
+The block-level walk of this pipeline — every stage, its control
+surface, and the clock domains — is on its own page:
+{doc}`hdl-datapath-corundum`.
+
 The bandwidth arithmetic that gates this phase:
 
 - 2 ch × 61.44 MSPS × 32 bit I/Q = 3.93 Gb/s one direction; RX+TX ≈
