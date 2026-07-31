@@ -11,15 +11,30 @@
  */
 
 /*
- * adi_doctools gives dark-mode SVGs a white card unless they are
- * .no-background or .flowchart. Mermaid only tags flowcharts with
- * .flowchart, so sequence/class/gantt diagrams — which doctools already
- * renders with the mermaid dark theme — would sit light-on-white.
- * Keep every mermaid SVG transparent instead.
+ * Mermaid readability, race-proof.
+ *
+ * adi_doctools picks the mermaid theme (dark/default) from a darkTheme
+ * value computed at module-eval time — BEFORE cosmic's app.umd.js applies
+ * the saved body.dark/body.light class — and only installs its
+ * theme-change observer after the first render. A theme class applied in
+ * that window leaves diagrams rendered with the wrong theme: dark pages
+ * can get light-rendered diagrams (invisible dark edges) and vice versa.
+ *
+ * Instead of assuming page theme == rendered theme, key the backdrop off
+ * the theme mermaid ACTUALLY rendered with: doctools sets (and on every
+ * re-render resets) the fullscreen button's .dark-theme class from that
+ * same darkTheme value. Give each diagram a card matching its rendered
+ * theme — invisible when page and diagram agree, a readable contrast
+ * card when the race made them disagree. !important outranks doctools'
+ * body.dark svg background:#fff rule.
  */
-body.dark pre.mermaid > svg,
-body.dark .mermaid-container svg {
-    background: transparent !important;
+.mermaid-container:has(.mermaid-fullscreen-btn:not(.dark-theme)) pre.mermaid > svg {
+    background: #ffffff !important;
+    border-radius: 0.5rem;
+}
+.mermaid-container:has(.mermaid-fullscreen-btn.dark-theme) pre.mermaid > svg {
+    background: #14181e !important;
+    border-radius: 0.5rem;
 }
 
 img.only-dark {
