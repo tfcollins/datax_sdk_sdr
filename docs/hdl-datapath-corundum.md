@@ -8,6 +8,10 @@ ADRV9361-Z7035 the same structure applies with the LVDS interface in
 place of JESD and an SFP+ cage behind the new GTX wrapper
 ({doc}`platform-adrv9361-z7035`).
 
+This page covers the RX (capture) direction; the transmit mirror —
+frames in from the network, samples out the JESD links — is
+{doc}`hdl-datapath-corundum-tx`.
+
 Two invariants define this page:
 
 1. **Sample data never enters PS DDR.** In offload mode the entire RX

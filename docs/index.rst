@@ -70,6 +70,7 @@ collateral exists, not proven on silicon), *planned* (documented intent).
    architecture-proposal
    streaming-model
    hdl-datapath-corundum
+   hdl-datapath-corundum-tx
    timing-synchronization
    non-goals
 

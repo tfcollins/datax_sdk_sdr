@@ -121,8 +121,9 @@ numbers) into the NIC datapath.
 ```
 
 The block-level walk of this pipeline — every stage, its control
-surface, and the clock domains — is on its own page:
-{doc}`hdl-datapath-corundum`.
+surface, and the clock domains — is on its own pages:
+{doc}`hdl-datapath-corundum` (RX) and {doc}`hdl-datapath-corundum-tx`
+(TX).
 
 The bandwidth arithmetic that gates this phase:
 
