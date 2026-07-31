@@ -99,7 +99,7 @@
   <!-- bandwidth note -->
   <text x="700" y="270" class="note-text" text-anchor="middle">Budget: 2 ch × 61.44 MSPS RX+TX ≈ 7.86 Gb/s before headers — marginal on one 10 G link.</text>
   <text x="700" y="288" class="note-text" text-anchor="middle">ZU11EG native 4 ch × 245.76 MSPS ≈ 31.5 Gb/s per direction → subsets, packing, or 25 G lanes.</text>
-  <text x="700" y="306" class="note-text" text-anchor="middle">Header target ≤ 2 % at 8k-sample payloads, jumbo frames on a point-to-point link.</text>
+  <text x="700" y="306" class="note-text" text-anchor="middle">Header overhead ≈ 0.9 % at 2048-sample payloads, jumbo frames on a point-to-point link.</text>
 
   <text x="550" y="340" class="note-text" text-anchor="middle">Dashed = new HDL (packetizer + app-section plumbing). Solid Corundum/NIC blocks exist upstream on the ZU11EG today.</text>
 </svg>

@@ -71,6 +71,7 @@ collateral exists, not proven on silicon), *planned* (documented intent).
    streaming-model
    hdl-datapath-corundum
    hdl-datapath-corundum-tx
+   vrt-frame-format
    timing-synchronization
    non-goals
 

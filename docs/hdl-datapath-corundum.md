@@ -63,18 +63,14 @@ stated as such — measured numbers replace them per
    remaining lanes are the headroom path discussed in
    {doc}`streaming-model`.
 
-### Frame format (spec-level)
+### Frame format
 
-| Field | Size | Source |
-|---|---|---|
-| VRT-style header (type, stream ID) | 8 B | packetizer CSR (per-stream) |
-| Sequence number | 4 B | per-stream counter in packetizer |
-| Integer + fractional timestamp | 12 B | in-band device time (Tick ticks + tick-rate metadata) |
-| Payload length | 4 B | CSR-programmed, fixed per stream |
-| I/Q payload | 8192 samples typ. | cpack output, 16-bit I/Q |
-
-Target ≤ 2 % header overhead at the typical payload with jumbo frames —
-the budget worked in {doc}`streaming-model`.
+VITA-49.2/DIFI-aligned signal-data packets: a 7-word prologue (type,
+stream ID, class ID, integer + picosecond-fractional device-time
+timestamp) ahead of a CSR-fixed I/Q payload — 2048 samples standard,
+0.9 % overhead on a jumbo-frame link. The canonical bit-level spec,
+timestamp encoding, and validation rules live in
+{doc}`vrt-frame-format`.
 
 ## Control flow (ARM only, no data)
 

@@ -41,7 +41,8 @@ representative of the ZU11EG reference configuration
    continues to the `mqnic` driver as normal.
 3. **VITA-49 depacketizer** *(new HDL — the P6 deliverable, shared
    design with the RX packetizer)*. Validates each frame (stream ID,
-   sequence number, length), strips VRT/UDP/IP headers, and emits the
+   sequence number, length — the full rule list is in
+   {doc}`vrt-frame-format`), strips VRT/UDP/IP headers, and emits the
    I/Q payload as AXI-Stream. Sequence gaps and malformed frames are
    counted and raised — the fill policy below decides what the DAC
    hears.

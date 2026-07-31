@@ -138,8 +138,9 @@ The bandwidth arithmetic that gates this phase:
   wrapper at all — its offload story is bounded to subsets from day one
   ({doc}`platform-adrv9361-z7035`).
 
-Header budget target: ≤ 2% overhead at 8k-sample payloads — one VRT-style
-header per packet, jumbo frames assumed on the point-to-point link.
+Header budget target: ≤ 2 % overhead — met at 0.9 % with the standard
+2048-sample payload on a jumbo-frame point-to-point link; the frame
+layout is specified in {doc}`vrt-frame-format`.
 
 **What Corundum does in the MVP, meanwhile:** the NIC is the control and
 telemetry plane — remote iiod over the fabric NIC, SDK event/telemetry
