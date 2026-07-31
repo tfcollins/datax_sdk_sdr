@@ -1,0 +1,196 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="adi-figure no-background"
+     viewBox="0 0 1100 650" width="100%"
+     style="max-width: 1080px; height: auto;">
+  <style>
+    svg.adi-figure {
+      --adi-fill-info:   #d4e1ec;
+      --adi-fill-drv:    #cbd9e8;
+      --adi-fill-mcu:    #f4dca0;
+      --adi-fill-hw:     #f7c8a4;
+      --adi-fill-app:    #e0d0e8;
+      --adi-fill-blank:  #ffffff;
+      --adi-box-stroke:  #c9bfa9;
+      --adi-panel-bg:    #f7f1e6;
+      --adi-panel-stroke:#e3dcc9;
+      --adi-datax-bg:    #e4ecf6;
+      --adi-datax-stroke:#b6c4dc;
+      --adi-text-strong: #2b2a26;
+      --adi-text-muted:  #6b6660;
+      --adi-arrow:       #b3aa97;
+      --adi-accent:      #6b8aaa;
+    }
+    @media (prefers-color-scheme: dark) {
+      svg.adi-figure {
+        --adi-fill-info: #2a3a52; --adi-fill-drv: #243246;
+        --adi-fill-mcu: #4d402a;  --adi-fill-hw: #4d3525;
+        --adi-fill-app: #3d2e48;  --adi-fill-blank: #14181e;
+        --adi-box-stroke: #4a5260;
+        --adi-panel-bg: #1a2028;  --adi-panel-stroke: #3a424b;
+        --adi-datax-bg: #1f2a3d;  --adi-datax-stroke: #3a4960;
+        --adi-text-strong: #e5e5e5; --adi-text-muted: #aaaaaa;
+        --adi-arrow: #6a7484;      --adi-accent: #7da3c4;
+      }
+    }
+    body.dark svg.adi-figure {
+      --adi-fill-info: #2a3a52; --adi-fill-drv: #243246;
+      --adi-fill-mcu: #4d402a;  --adi-fill-hw: #4d3525;
+      --adi-fill-app: #3d2e48;  --adi-fill-blank: #14181e;
+      --adi-box-stroke: #4a5260;
+      --adi-panel-bg: #1a2028;  --adi-panel-stroke: #3a424b;
+      --adi-datax-bg: #1f2a3d;  --adi-datax-stroke: #3a4960;
+      --adi-text-strong: #e5e5e5; --adi-text-muted: #aaaaaa;
+      --adi-arrow: #6a7484;      --adi-accent: #7da3c4;
+    }
+    svg.adi-figure .adi-panel { fill: var(--adi-panel-bg); stroke: var(--adi-panel-stroke); stroke-width: 1.25; }
+    svg.adi-figure .adi-datax-band { fill: var(--adi-datax-bg); stroke: var(--adi-datax-stroke); stroke-width: 1.25; }
+    svg.adi-figure .adi-title { font: 600 18px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-strong); }
+    svg.adi-figure .adi-subtitle { font: 13px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .adi-section-label { font: 600 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); letter-spacing: 0.04em; }
+    svg.adi-figure .box { stroke: var(--adi-box-stroke); stroke-width: 1.25; }
+    svg.adi-figure .box-roadmap { fill: var(--adi-fill-blank); stroke: var(--adi-accent); stroke-width: 1.25; stroke-dasharray: 6 4; }
+    svg.adi-figure .box-text { font: 600 13px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-strong); }
+    svg.adi-figure .box-desc { font: 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .arrow { stroke: var(--adi-arrow); stroke-width: 1.5; fill: none; }
+    svg.adi-figure .arrow-roadmap { stroke: var(--adi-accent); stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; }
+    svg.adi-figure .arrowhead-fill { fill: var(--adi-arrow); }
+    svg.adi-figure .arrow-label { font: italic 10px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .note-text { font: italic 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .accent-text { fill: var(--adi-accent); }
+  </style>
+
+  <defs>
+    <marker id="dx-arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" class="arrowhead-fill"/>
+    </marker>
+  </defs>
+
+  <rect x="10" y="10" width="1080" height="620" rx="14" class="adi-panel"/>
+
+  <text x="550" y="38" class="adi-title" text-anchor="middle">DataX SDR SDK — layered architecture</text>
+  <text x="550" y="58" class="adi-subtitle" text-anchor="middle">One SDR API over the stock ADI stack — Tick hard-timed control · Corundum network plane · libiio underneath</text>
+
+  <!-- ============== Host column ============== -->
+  <text x="155" y="92" class="adi-section-label" text-anchor="middle">HOST</text>
+
+  <rect x="40" y="110" width="230" height="64" rx="8" class="box" fill="var(--adi-fill-app)"/>
+  <text x="155" y="135" class="box-text" text-anchor="middle">User application</text>
+  <text x="155" y="153" class="box-desc" text-anchor="middle">C · Python · (GNU Radio later)</text>
+
+  <rect x="40" y="200" width="230" height="56" rx="8" class="box" fill="var(--adi-fill-info)"/>
+  <text x="155" y="222" class="box-text" text-anchor="middle">Python package "datax"</text>
+  <text x="155" y="240" class="box-desc" text-anchor="middle">pyadi-iio idioms · numpy buffers</text>
+
+  <rect x="40" y="280" width="230" height="88" rx="8" class="box" fill="var(--adi-fill-info)"/>
+  <text x="155" y="305" class="box-text" text-anchor="middle">libdatax — C core</text>
+  <text x="155" y="323" class="box-desc" text-anchor="middle">context · device · stream · sched · caps</text>
+  <text x="155" y="339" class="box-desc" text-anchor="middle">capability discovery</text>
+  <text x="155" y="355" class="box-desc" text-anchor="middle">descriptor batching · completion ring</text>
+
+  <rect x="40" y="460" width="230" height="64" rx="8" class="box" fill="var(--adi-fill-app)"/>
+  <text x="155" y="484" class="box-text" text-anchor="middle">Host 10G NIC</text>
+  <text x="155" y="502" class="box-desc" text-anchor="middle">mqnic peer · control + telemetry</text>
+
+  <text x="155" y="560" class="note-text" text-anchor="middle">iio_attr · IIO Oscilloscope</text>
+  <text x="155" y="576" class="note-text" text-anchor="middle">keep working beside the SDK</text>
+
+  <!-- ============== SoC column ============== -->
+  <text x="540" y="92" class="adi-section-label" text-anchor="middle">ZYNQ / ZYNQMP SOC</text>
+  <rect x="320" y="105" width="440" height="480" rx="10" class="box" fill="var(--adi-fill-blank)"/>
+
+  <!-- Linux sub-box -->
+  <rect x="340" y="130" width="400" height="110" rx="8" class="box" fill="var(--adi-fill-drv)"/>
+  <text x="540" y="152" class="box-text" text-anchor="middle">Linux</text>
+  <text x="540" y="172" class="box-desc" text-anchor="middle">libiio · iiod — remote / local contexts</text>
+  <text x="540" y="188" class="box-desc" text-anchor="middle">ad9361 / adrv9009 drivers · axi-dmac</text>
+  <text x="540" y="204" class="box-desc" text-anchor="middle">Tick IIO scheduler driver · mqnic netdev</text>
+  <text x="540" y="220" class="box-desc" text-anchor="middle">sysfs attributes · /dev/iio buffers</text>
+
+  <!-- FPGA fabric band -->
+  <rect x="340" y="260" width="400" height="310" rx="8" class="adi-datax-band"/>
+  <text x="540" y="278" class="adi-section-label" text-anchor="middle">FPGA FABRIC</text>
+
+  <rect x="355" y="290" width="180" height="96" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="445" y="312" class="box-text" text-anchor="middle">Tick scheduler</text>
+  <text x="445" y="330" class="box-desc" text-anchor="middle">axi_timed_command_scheduler</text>
+  <text x="445" y="346" class="box-desc" text-anchor="middle">64-bit device time · cmd FIFO</text>
+  <text x="445" y="362" class="box-desc" text-anchor="middle">gpio · marker · gate · sync</text>
+
+  <rect x="555" y="290" width="180" height="96" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="645" y="312" class="box-text" text-anchor="middle">Stream datapath</text>
+  <text x="645" y="330" class="box-desc" text-anchor="middle">JESD204B / LVDS link</text>
+  <text x="645" y="346" class="box-desc" text-anchor="middle">cpack · timestamp tag</text>
+  <text x="645" y="362" class="box-desc" text-anchor="middle">data_offload · axi_dmac</text>
+
+  <rect x="355" y="400" width="180" height="80" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="445" y="424" class="box-text" text-anchor="middle">Corundum NIC</text>
+  <text x="445" y="442" class="box-desc" text-anchor="middle">mqnic_core_axi</text>
+  <text x="445" y="458" class="box-desc" text-anchor="middle">QSFP+ 10G · PTP-capable</text>
+
+  <rect x="555" y="400" width="180" height="80" rx="8" class="box-roadmap"/>
+  <text x="645" y="424" class="box-text accent-text" text-anchor="middle">VITA-49 packetizer</text>
+  <text x="645" y="442" class="box-desc" text-anchor="middle">Corundum app section</text>
+  <text x="645" y="458" class="box-desc" text-anchor="middle">RF samples → Ethernet</text>
+
+  <text x="540" y="530" class="note-text" text-anchor="middle">device-time discipline from external PPS + 10 MHz</text>
+
+  <!-- ============== RF column ============== -->
+  <text x="930" y="92" class="adi-section-label" text-anchor="middle">RF / TIMING</text>
+
+  <rect x="800" y="160" width="260" height="80" rx="8" class="box" fill="var(--adi-fill-hw)"/>
+  <text x="930" y="185" class="box-text" text-anchor="middle">AD9361 — ADRV9361-Z7035</text>
+  <text x="930" y="203" class="box-desc" text-anchor="middle">2R2T · LVDS CMOS interface</text>
+  <text x="930" y="219" class="box-desc" text-anchor="middle">fastlock profiles on CTRL_IN</text>
+
+  <rect x="800" y="270" width="260" height="90" rx="8" class="box" fill="var(--adi-fill-hw)"/>
+  <text x="930" y="295" class="box-text" text-anchor="middle">2× ADRV9009 — ZU11EG</text>
+  <text x="930" y="313" class="box-desc" text-anchor="middle">JESD204B · HMC7044 clocking</text>
+  <text x="930" y="329" class="box-desc" text-anchor="middle">MCS → phase-coherent 4R4T</text>
+  <text x="930" y="345" class="box-desc" text-anchor="middle">Talise FHM hop on ARM GPIO</text>
+
+  <rect x="800" y="470" width="260" height="64" rx="8" class="box" fill="var(--adi-fill-hw)"/>
+  <text x="930" y="494" class="box-text" text-anchor="middle">Timing reference</text>
+  <text x="930" y="512" class="box-desc" text-anchor="middle">PPS + 10 MHz · shared across boards</text>
+
+  <!-- ============== Arrows ============== -->
+  <!-- app → python → libdatax -->
+  <line x1="155" y1="174" x2="155" y2="198" class="arrow" marker-end="url(#dx-arrow)"/>
+  <line x1="155" y1="256" x2="155" y2="278" class="arrow" marker-end="url(#dx-arrow)"/>
+
+  <!-- libdatax ↔ Linux -->
+  <line x1="270" y1="300" x2="338" y2="190" class="arrow" marker-end="url(#dx-arrow)"/>
+  <line x1="338" y1="210" x2="270" y2="320" class="arrow" marker-end="url(#dx-arrow)" stroke-dasharray="6,4"/>
+  <text x="296" y="160" class="arrow-label accent-text" text-anchor="middle">libiio — Ethernet · USB · local</text>
+
+  <!-- Linux → fabric -->
+  <line x1="445" y1="240" x2="445" y2="288" class="arrow" marker-end="url(#dx-arrow)"/>
+  <text x="445" y="256" class="arrow-label accent-text" text-anchor="middle">AXI-Lite</text>
+  <line x1="645" y1="240" x2="645" y2="288" class="arrow" marker-end="url(#dx-arrow)"/>
+  <text x="648" y="256" class="arrow-label accent-text" text-anchor="middle">DMA · AXI</text>
+
+  <!-- Tick → datapath (sync_ext / gates) -->
+  <line x1="535" y1="338" x2="553" y2="338" class="arrow" marker-end="url(#dx-arrow)"/>
+  <text x="544" y="326" class="arrow-label" text-anchor="middle">sync_ext</text>
+
+  <!-- datapath → packetizer (roadmap) -->
+  <line x1="645" y1="386" x2="645" y2="398" class="arrow-roadmap" marker-end="url(#dx-arrow)"/>
+
+  <!-- packetizer → Corundum (roadmap) -->
+  <line x1="555" y1="440" x2="537" y2="440" class="arrow-roadmap" marker-end="url(#dx-arrow)"/>
+
+  <!-- Corundum → host NIC -->
+  <line x1="355" y1="440" x2="272" y2="488" class="arrow" marker-end="url(#dx-arrow)"/>
+  <text x="308" y="472" class="arrow-label accent-text" text-anchor="middle">QSFP+ 10G</text>
+
+  <!-- datapath ↔ RF -->
+  <line x1="735" y1="315" x2="798" y2="200" class="arrow" marker-end="url(#dx-arrow)"/>
+  <text x="775" y="248" class="arrow-label" text-anchor="middle">LVDS</text>
+  <line x1="735" y1="340" x2="798" y2="310" class="arrow" marker-end="url(#dx-arrow)"/>
+  <text x="772" y="336" class="arrow-label" text-anchor="middle">JESD204B</text>
+
+  <!-- timing reference → fabric -->
+  <line x1="798" y1="502" x2="742" y2="502" class="arrow" marker-end="url(#dx-arrow)"/>
+  <text x="770" y="490" class="arrow-label" text-anchor="middle">PPS · 10 MHz</text>
+
+  <!-- footer -->
+  <text x="550" y="612" class="note-text" text-anchor="middle">Solid = MVP scope · dashed = roadmap (RF-sample offload). Corundum: upstream on ZU11EG today; the Z7035 wrapper is new work — see the platform pages.</text>
+</svg>
