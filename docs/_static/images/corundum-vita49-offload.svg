@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="adi-figure no-background"
+     viewBox="0 0 1100 370" width="100%"
+     style="max-width: 1080px; height: auto;">
+  <style>
+    svg.adi-figure {
+      --adi-fill-info:   #d4e1ec;
+      --adi-fill-mcu:    #f4dca0;
+      --adi-fill-hw:     #f7c8a4;
+      --adi-fill-blank:  #ffffff;
+      --adi-box-stroke:  #c9bfa9;
+      --adi-panel-bg:    #f7f1e6;
+      --adi-panel-stroke:#e3dcc9;
+      --adi-text-strong: #2b2a26;
+      --adi-text-muted:  #6b6660;
+      --adi-arrow:       #b3aa97;
+      --adi-accent:      #6b8aaa;
+    }
+    @media (prefers-color-scheme: dark) {
+      svg.adi-figure {
+        --adi-fill-info: #2a3a52; --adi-fill-mcu: #4d402a; --adi-fill-hw: #4d3525;
+        --adi-fill-blank: #14181e; --adi-box-stroke: #4a5260;
+        --adi-panel-bg: #1a2028;  --adi-panel-stroke: #3a424b;
+        --adi-text-strong: #e5e5e5; --adi-text-muted: #aaaaaa;
+        --adi-arrow: #6a7484;      --adi-accent: #7da3c4;
+      }
+    }
+    body.dark svg.adi-figure {
+      --adi-fill-info: #2a3a52; --adi-fill-mcu: #4d402a; --adi-fill-hw: #4d3525;
+      --adi-fill-blank: #14181e; --adi-box-stroke: #4a5260;
+      --adi-panel-bg: #1a2028;  --adi-panel-stroke: #3a424b;
+      --adi-text-strong: #e5e5e5; --adi-text-muted: #aaaaaa;
+      --adi-arrow: #6a7484;      --adi-accent: #7da3c4;
+    }
+    svg.adi-figure .adi-panel { fill: var(--adi-panel-bg); stroke: var(--adi-panel-stroke); stroke-width: 1.25; }
+    svg.adi-figure .adi-title { font: 600 18px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-strong); }
+    svg.adi-figure .adi-subtitle { font: 13px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .box { stroke: var(--adi-box-stroke); stroke-width: 1.25; }
+    svg.adi-figure .box-roadmap { fill: var(--adi-fill-blank); stroke: var(--adi-accent); stroke-width: 1.25; stroke-dasharray: 6 4; }
+    svg.adi-figure .box-text { font: 600 13px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-strong); }
+    svg.adi-figure .box-desc { font: 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .arrow { stroke: var(--adi-arrow); stroke-width: 1.5; fill: none; }
+    svg.adi-figure .arrow-roadmap { stroke: var(--adi-accent); stroke-width: 1.5; fill: none; stroke-dasharray: 6 4; }
+    svg.adi-figure .arrowhead-fill { fill: var(--adi-arrow); }
+    svg.adi-figure .arrow-label { font: italic 10px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .note-text { font: italic 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--adi-text-muted); }
+    svg.adi-figure .accent-text { fill: var(--adi-accent); }
+  </style>
+
+  <defs>
+    <marker id="cv-arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" class="arrowhead-fill"/>
+    </marker>
+  </defs>
+
+  <rect x="10" y="10" width="1080" height="350" rx="14" class="adi-panel"/>
+
+  <text x="550" y="38" class="adi-title" text-anchor="middle">RF-sample offload through the Corundum application section</text>
+  <text x="550" y="58" class="adi-subtitle" text-anchor="middle">Roadmap phase — samples bypass PS DDR entirely; the MVP DMA path below stays unchanged</text>
+
+  <!-- flow boxes -->
+  <rect x="40" y="110" width="180" height="90" rx="8" class="box" fill="var(--adi-fill-hw)"/>
+  <text x="130" y="138" class="box-text" text-anchor="middle">Converter samples</text>
+  <text x="130" y="156" class="box-desc" text-anchor="middle">JESD204B / LVDS</text>
+  <text x="130" y="172" class="box-desc" text-anchor="middle">cpack channel mux</text>
+
+  <rect x="250" y="110" width="180" height="90" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="340" y="138" class="box-text" text-anchor="middle">Timestamp tag</text>
+  <text x="340" y="156" class="box-desc" text-anchor="middle">tick_stream_timestamp_tag</text>
+  <text x="340" y="172" class="box-desc" text-anchor="middle">device time in-band</text>
+
+  <rect x="460" y="110" width="180" height="90" rx="8" class="box-roadmap"/>
+  <text x="550" y="138" class="box-text accent-text" text-anchor="middle">VITA-49 packetizer</text>
+  <text x="550" y="156" class="box-desc" text-anchor="middle">VRT-style frames</text>
+  <text x="550" y="172" class="box-desc" text-anchor="middle">timestamp · stream ID · seq</text>
+
+  <rect x="670" y="110" width="180" height="90" rx="8" class="box" fill="var(--adi-fill-mcu)"/>
+  <text x="760" y="138" class="box-text" text-anchor="middle">Corundum NIC</text>
+  <text x="760" y="156" class="box-desc" text-anchor="middle">app section → TX queues</text>
+  <text x="760" y="172" class="box-desc" text-anchor="middle">mqnic datapath · PTP-capable</text>
+
+  <rect x="880" y="110" width="180" height="90" rx="8" class="box" fill="var(--adi-fill-info)"/>
+  <text x="970" y="138" class="box-text" text-anchor="middle">Host</text>
+  <text x="970" y="156" class="box-desc" text-anchor="middle">line-rate capture</text>
+  <text x="970" y="172" class="box-desc" text-anchor="middle">kernel stack · DPDK · AF_XDP</text>
+
+  <!-- flow arrows -->
+  <line x1="220" y1="155" x2="248" y2="155" class="arrow" marker-end="url(#cv-arrow)"/>
+  <line x1="430" y1="155" x2="458" y2="155" class="arrow-roadmap" marker-end="url(#cv-arrow)"/>
+  <line x1="640" y1="155" x2="668" y2="155" class="arrow-roadmap" marker-end="url(#cv-arrow)"/>
+  <line x1="850" y1="155" x2="878" y2="155" class="arrow" marker-end="url(#cv-arrow)"/>
+  <text x="864" y="143" class="arrow-label accent-text" text-anchor="middle">QSFP+</text>
+
+  <!-- MVP bypass path -->
+  <line x1="340" y1="200" x2="340" y2="250" class="arrow" marker-end="url(#cv-arrow)"/>
+  <rect x="250" y="252" width="180" height="60" rx="8" class="box" fill="var(--adi-fill-blank)"/>
+  <text x="340" y="276" class="box-text" text-anchor="middle">MVP path (unchanged)</text>
+  <text x="340" y="294" class="box-desc" text-anchor="middle">data_offload → axi_dmac → PS DDR</text>
+
+  <!-- bandwidth note -->
+  <text x="700" y="270" class="note-text" text-anchor="middle">Budget: 2 ch × 61.44 MSPS RX+TX ≈ 7.86 Gb/s before headers — marginal on one 10 G link.</text>
+  <text x="700" y="288" class="note-text" text-anchor="middle">ZU11EG native 4 ch × 245.76 MSPS ≈ 31.5 Gb/s per direction → subsets, packing, or 25 G lanes.</text>
+  <text x="700" y="306" class="note-text" text-anchor="middle">Header target ≤ 2 % at 8k-sample payloads, jumbo frames on a point-to-point link.</text>
+
+  <text x="550" y="340" class="note-text" text-anchor="middle">Dashed = new HDL (packetizer + app-section plumbing). Solid Corundum/NIC blocks exist upstream on the ZU11EG today.</text>
+</svg>
