@@ -1,8 +1,11 @@
 # API Object Model
 
 The concepts behind the C surface in {doc}`api-c-core` and the Python
-surface in {doc}`api-python`. This page is the canonical home of the
-capability matrix — other pages link here rather than duplicating it.
+surface in {doc}`api-python`. The *why* behind the surface's size — and
+the requirements that police it — live in {doc}`api-design-goals`; how
+applications compose it is {doc}`api-application-mapping`. This page is
+the canonical home of the capability matrix — other pages link here
+rather than duplicating it.
 
 ## Design principles
 

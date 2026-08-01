@@ -79,9 +79,11 @@ collateral exists, not proven on silicon), *planned* (documented intent).
    :maxdepth: 2
    :caption: API Specification
 
+   api-design-goals
    api-object-model
    api-c-core
    api-python
+   api-application-mapping
 
 .. toctree::
    :maxdepth: 2
