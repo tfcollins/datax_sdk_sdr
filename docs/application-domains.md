@@ -53,6 +53,25 @@ entirely — a 1 kHz PRF sits far inside Linux scheduling jitter, so
 the pulse schedule must run from fabric while the host refills a
 horizon of queued gates.
 
+One CPI on the wire — the host appears twice, the fabric every pulse:
+
+```{mermaid}
+sequenceDiagram
+    participant App
+    participant SDK as libdatax
+    participant FAB as fabric (Tick)
+
+    App->>SDK: gate schedule for one CPI (N pulses, PRI spacing)
+    SDK->>FAB: queued descriptors, horizon ahead
+    loop every PRI — no host involvement
+        FAB->>FAB: TX gate at T + k·PRI
+        FAB->>FAB: RX gate at T + k·PRI + range offset
+        FAB-->>SDK: echo block, timestamp = range zero
+    end
+    SDK-->>App: N timestamped blocks → one CPI
+    App->>SDK: refill horizon (next CPI)
+```
+
 **The author never writes:** DMA arm/release mechanics, per-pulse
 descriptor submission, gate-edge timing loops, or timestamp recovery
 from raw buffers.
@@ -95,6 +114,23 @@ capability data so the frequency plan can be sized before deployment;
 and sustained capture rates that are stated per platform
 ({doc}`streaming-model`).
 
+The two loops — the SDK owns the survey loop; the reactive loop is
+fabric territory, out of the SDK's scope:
+
+```{mermaid}
+graph TD
+    subgraph OUTER ["SDK survey loop"]
+        A[stage hop table<br/>fastlock / FHM] --> B[hard-timed hop edge<br/>at dwell boundary]
+        B --> C[timestamped dwell capture<br/>TOA survives the retune]
+        C --> D[PDW extraction +<br/>deinterleaving — app code]
+        D --> B
+    end
+    subgraph INNER ["FPGA fast loop"]
+        X[detect] -.->|sub-µs,<br/>not the SDK's| Y[respond] -.-> X
+    end
+    OUTER -. pre-staged responses,<br/>armed gates, telemetry .-> INNER
+```
+
 **The author never writes:** fastlock/FHM register programming,
 CTRL_IN/GPIO wiring, dwell-boundary bookkeeping, or settling-time
 guesswork.
@@ -136,6 +172,21 @@ silent phase ambiguity discovered later in the bearing residuals; and
 repeatable timed captures for calibration, with the repeatability
 bound published (REQ-TEST-032).
 
+The coherence lifecycle the application observes:
+
+```{mermaid}
+stateDiagram-v2
+    direction LR
+    state "Not coherent" as NC
+    state "Phase coherent<br/>(capability flag true)" as C
+    [*] --> NC
+    NC --> C : run_mcs()
+    C --> NC : tune either chip
+    C --> C : staged hop within table
+    NC --> NC : coherent stream start — refused, loud
+    C --> C : N-channel capture,<br/>one timestamp per block
+```
+
 **The author never writes:** HMC7044/SYSREF choreography, JESD204B
 deterministic-latency bring-up, MCS step sequencing, or coherence
 bookkeeping across retunes.
@@ -172,6 +223,25 @@ platform — the MVP path is host-link bound on the Z7035 (the rate
 table in {doc}`streaming-model`) — so a symbol rate can be validated
 against reality on paper, before hardware; and cyclic TX for beacons
 and pilots with the host fully detached.
+
+Network entry — both ends agree on the timeline before a single
+burst flies (per-frame mechanics are the TDD walkthrough in
+{doc}`api-application-mapping`):
+
+```{mermaid}
+sequenceDiagram
+    participant A as station A
+    participant REF as PPS + 10 MHz
+    participant B as station B
+
+    REF-->>A: PPS edge
+    REF-->>B: PPS edge
+    A->>A: set_time_next_pps(epoch)
+    B->>B: set_time_next_pps(epoch)
+    Note over A,B: both timelines agree what "slot 0" means
+    A->>B: TX burst, slot k — gate fires at slot boundary
+    B->>A: TX burst, slot k+1 — gate fires at slot boundary
+```
 
 **The author never writes:** per-frame host wakeups, `axi_tdd`
 register programming, or (to first order) buffer-geometry tuning.
