@@ -4,7 +4,8 @@ How real applications decompose onto the focused verb set
 ({doc}`api-design-goals`). This page is the API's accountability
 mechanism: each archetype must be expressible with the shipped verbs
 and capabilities — if one is not, the spec changes (REQ-DOC-001), not
-the application.
+the application. The mission-side view — which domains generate these
+archetypes and why — is {doc}`application-domains`.
 
 ## The matrix
 

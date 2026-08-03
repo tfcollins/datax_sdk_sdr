@@ -67,6 +67,7 @@ collateral exists, not proven on silicon), *planned* (documented intent).
    :caption: Concepts
 
    background-prior-art
+   application-domains
    architecture-proposal
    streaming-model
    hdl-datapath-corundum
@@ -106,6 +107,7 @@ Where to start
 --------------
 
 * **Why another SDK?** Read :doc:`background-prior-art`.
+* **What missions demand of it:** :doc:`application-domains`.
 * **How it all fits together:** :doc:`architecture-proposal`.
 * **What the API will look like:** :doc:`api-object-model` then
   :doc:`api-python`.

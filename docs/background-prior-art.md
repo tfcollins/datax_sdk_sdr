@@ -112,4 +112,6 @@ The bandwidth arithmetic that forces this phasing is worked through in
 
 The intent is not UHD compatibility (see :doc:`non-goals`) — it is UHD
 *parity of expressiveness* on the ADI stack, with libiio kept underneath as
-an escape hatch.
+an escape hatch. What that expressiveness gap costs real missions — radar,
+EW, direction finding, communications — is worked through in
+{doc}`application-domains`.
