@@ -13,6 +13,11 @@ extensions = [
 ]
 needs_extensions = {"adi_doctools": "0.4.21"}
 
+# deterministicIds: mermaid's default IDs come from Date.now(), so two
+# diagrams rendered within the same millisecond collide and one lands
+# inside the other's container. A counter-based ID never collides.
+mermaid_init_config = {"startOnLoad": False, "deterministicIds": True}
+
 html_theme = "cosmic"
 html_logo = "_static/logo.svg"
 html_theme_options = {

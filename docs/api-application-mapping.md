@@ -36,6 +36,23 @@ fastlock select on the Z7035, FHM on the ZU11EG) → one gapless
 dwell using the in-band timestamps → `sched.wait_all()` confirms every
 hop fired on time.
 
+```{mermaid}
+sequenceDiagram
+    participant App
+    participant SDK as libdatax
+    participant FAB as fabric (Tick)
+
+    App->>SDK: stage_hop_table (once, untimed)
+    App->>SDK: sched.at(t_k).tune(f_k) — all dwells, one commit
+    App->>SDK: rx.start_at(T) — one gapless stream
+    loop every dwell — no host involvement
+        FAB->>FAB: hop edge at t_k (pre-staged)
+        FAB-->>SDK: samples keep flowing, timestamped
+    end
+    SDK-->>App: wait_all() — every hop on time, or loud
+    App->>App: slice the capture by dwell via timestamps
+```
+
 **The SDK hid:** fastlock profile programming, CTRL_IN/FHM GPIO
 wiring, descriptor batching, offload arming, timestamp recovery.
 Reference code: the hop-scan example in {doc}`api-python`
@@ -53,6 +70,15 @@ direction finding, beamforming calibration, MIMO channel sounding.
 one RX stream with a channel mask spanning both chips →
 `start_at(T)` → every block is a phase-consistent `(4, N)` array with
 one timestamp.
+
+```{mermaid}
+graph LR
+    A["run_mcs()"] --> B["assert 'phase_coherent'<br/>in dev.caps"]
+    B --> C["open RX stream —<br/>mask spans both chips"]
+    C --> D["start_at(T)"]
+    D --> E["(4, N) blocks,<br/>one timestamp each"]
+    T[tune] -.->|invalidates<br/>coherence| A
+```
 
 **The SDK hid:** HMC7044 SYSREF choreography, Talise MCS steps,
 deterministic-latency JESD bring-up, the coherence-invalidation rules
@@ -106,6 +132,13 @@ disk with their timestamps. Replay — `tx(data)` one-shot, or
 detached. Timed replay (`start_at`) aligns playback to a device-time
 edge for receiver-under-test work.
 
+```{mermaid}
+graph LR
+    A[RX stream,<br/>deep buffers] --> B[blocks +<br/>timestamps] --> C[(storage)]
+    C --> D["tx(data),<br/>cyclic=True"] --> E[fabric repeats —<br/>host detached]
+    S["start_at(T)"] -.->|aligns replay to a<br/>device-time edge| D
+```
+
 **The SDK hid:** cyclic buffer mechanics, sustained-rate buffer
 sizing (caps carry the platform's DMA bounds), underflow surfacing.
 
@@ -125,6 +158,22 @@ the shared timeline; `marker` outputs give the scope-verifiable proof
 (REQ-TEST-023). Cross-node phase coherence is *not* claimed — this is
 time alignment, honest per {doc}`timing-synchronization`.
 
+```{mermaid}
+graph TD
+    CTL[control host —<br/>one context per node,<br/>remote URIs]
+    REF[shared PPS + 10 MHz]
+    CTL --> N1[node 1]
+    CTL --> N2[node 2]
+    CTL --> N3[node n]
+    REF -.-> N1
+    REF -.-> N2
+    REF -.-> N3
+    N1 --> ALIGN["set_time_next_pps(epoch),<br/>then start_at(T), every node"]
+    N2 --> ALIGN
+    N3 --> ALIGN
+    ALIGN --> OUT[captures on one timeline —<br/>markers = scope-verifiable proof]
+```
+
 **Roadmap:** P6 turns each node into a line-rate frame source toward a
 collection host — the "radiohead over the network" end state.
 
@@ -138,6 +187,15 @@ suites themselves.
 `start_at` only where the measurement needs a known capture instant
 (settling profiles); events monitored so an overflow invalidates a
 measurement loudly rather than skewing it.
+
+```{mermaid}
+graph LR
+    A["set state<br/>(DATAX_TIME_NOW)"] --> B["capture — start_at<br/>where the instant matters"]
+    B --> C[measure] --> D{next<br/>point?}
+    D -->|yes| A
+    D -->|done| E[report]
+    EV[overflow event] -.->|invalidates the<br/>point, loudly| C
+```
 
 **Mapping note:** the test tiers consume the same public API as
 applications — no privileged backdoor — so passing Tier 3 *is*
