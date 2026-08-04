@@ -3,6 +3,20 @@
 Numbered so later phases trace against them. "Per platform" means one
 set for the Z7035 rig and one for the ZU11EG rig.
 
+```{mermaid}
+graph TD
+    TS[timing source —<br/>locked PPS + 10 MHz] --> R1[Z7035 rig]
+    TS --> R2[ZU11EG rig]
+    TS --> SC[scope — 500 MHz, 4 ch,<br/>triggers from PPS]
+    R1 --> SC
+    R2 --> SC
+    LG[labgrid exporter —<br/>power, console, boot] --> R1
+    LG --> R2
+    R2 --- NET[dual-port 10 G host NIC,<br/>QSFP+ DAC breakout]
+    R1 --- LB[RF loopback per rig —<br/>TX→RX, 30 dB pads]
+    R2 --- LB
+```
+
 ## Lab inventory — per platform
 
 - **REQ-HW-001** — Target board and carrier: ADRV9361-Z7035 on

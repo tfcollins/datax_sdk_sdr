@@ -180,6 +180,26 @@ submission would bottleneck and lose completions. The SDK therefore:
   a Tick roadmap item) wants. When it lands, `commit()` becomes one
   ioctl and the poller thread retires, **with no API change**.
 
+```{mermaid}
+sequenceDiagram
+    participant App
+    participant SDK as libdatax
+    participant DRV as Tick IIO driver
+    participant HW as scheduler (fabric)
+
+    App->>SDK: queue_tune / queue_gpio / ... (client-side, sorted)
+    App->>SDK: commit()
+    SDK->>DRV: descriptor writes, back-to-back, one pass
+    DRV->>HW: 48-byte descriptors → command FIFO
+    HW-->>DRV: completions (polled one-entry window)
+    loop SDK poller thread
+        SDK->>DRV: drain + ack window
+        SDK->>SDK: append to completion ring
+    end
+    App->>SDK: wait(seq) / get_completions()
+    SDK-->>App: {seq, status, requested, executed}
+```
+
 Rates that fit this design: hundreds of commands per commit at
 millisecond cadence — hop schedules, TDD frames, capture batches. Not
 per-sample control ({doc}`non-goals`).

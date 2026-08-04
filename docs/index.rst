@@ -103,6 +103,12 @@ collateral exists, not proven on silicon), *planned* (documented intent).
    requirements-support
    roadmap
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Download
+
+   PDF version <https://tfcollins.github.io/datax_sdk_sdr/datax-sdr-sdk.pdf>
+
 Where to start
 --------------
 

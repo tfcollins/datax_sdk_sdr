@@ -1,0 +1,144 @@
+/* PDF stylesheet — loaded ONLY by the `make pdf` singlehtml build
+ * (see docs/Makefile). The cosmic theme does not style the singlehtml
+ * builder's markup, so this file provides the print layout: hide the
+ * navigation chrome, style the document body for paper. */
+
+/* Navigation chrome: gone. */
+header,
+.search-area,
+.repotoc-tree,
+.localtoc,
+.sphinxsidebar,
+.body-header,
+input[type="checkbox"],
+label[for="input-show-toc"],
+label[for="input-show-localtoc"],
+label[for="input-show-repotoc"],
+.mermaid-fullscreen-btn,
+a.headerlink {
+    display: none !important;
+}
+
+/* Document body: single readable column. */
+body {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 11pt;
+    line-height: 1.45;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 0;
+}
+
+.document,
+.documentwrapper,
+.bodywrapper {
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
+
+.body {
+    max-width: 17cm;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* Headings: sans-serif, section breaks at page level. */
+h1, h2, h3, h4 {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.2;
+    page-break-after: avoid;
+}
+
+h1 {
+    font-size: 20pt;
+    border-bottom: 2px solid #1a1a1a;
+    padding-bottom: 0.2em;
+    page-break-before: always;
+    margin-top: 0;
+}
+
+/* The very first h1 (cover/index) gets no forced break. */
+.body > section:first-child > h1 {
+    page-break-before: auto;
+}
+
+h2 { font-size: 14pt; margin-top: 1.4em; }
+h3 { font-size: 12pt; }
+
+/* Code. */
+code, pre, tt {
+    font-family: "DejaVu Sans Mono", Menlo, Consolas, monospace;
+    font-size: 9pt;
+}
+
+pre {
+    background: #f4f4f4;
+    border: 0.5pt solid #ccc;
+    border-radius: 3px;
+    padding: 6pt 8pt;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    page-break-inside: avoid;
+}
+
+code.literal {
+    background: #f4f4f4;
+    padding: 0 2pt;
+    border-radius: 2px;
+}
+
+/* Tables. */
+table.docutils {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+    margin: 0.8em 0;
+}
+
+table.docutils th,
+table.docutils td {
+    border: 0.5pt solid #999;
+    padding: 3pt 6pt;
+    text-align: left;
+    vertical-align: top;
+}
+
+table.docutils th {
+    background: #eee;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Diagrams: full-width, never split across pages. */
+pre.mermaid {
+    background: #fff;
+    border: none;
+    page-break-inside: avoid;
+}
+
+pre.mermaid > svg {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+.body svg {
+    max-width: 100%;
+    height: auto;
+    page-break-inside: avoid;
+}
+
+/* Links: keep the text readable on paper, no URL dumps. */
+a, a:visited {
+    color: #1a4b8b;
+    text-decoration: none;
+}
+
+/* Admonitions. */
+div.admonition {
+    border: 0.5pt solid #999;
+    border-left: 3pt solid #1a4b8b;
+    padding: 4pt 8pt;
+    page-break-inside: avoid;
+}

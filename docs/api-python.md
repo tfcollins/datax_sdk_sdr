@@ -18,6 +18,15 @@ blocks yet).
 - **context managers** — every object is a `with`-able; teardown order
   follows the C ownership rules.
 
+```{mermaid}
+graph LR
+    APP[application] --> DX[datax package —<br/>properties, builders,<br/>with-contexts]
+    DX --> CA[ctypes bindings —<br/>pure-Python wheel]
+    CA --> LD[libdatax.so]
+    LD -->|int16 I/Q blocks| CA
+    CA -->|numpy complex64;<br/>raw int16 path for<br/>throughput| APP
+```
+
 ## C → Python mapping
 
 | C | Python | Notes |

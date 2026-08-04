@@ -4,6 +4,14 @@ Four tiers. A capability may not be advertised (matrix in
 {doc}`api-object-model`) until its tier-2/tier-3 criteria pass on that
 platform — "validated" status is earned, never asserted.
 
+```{mermaid}
+graph LR
+    T1[Tier 1 — sim + unit<br/>every push, under 5 min] --> T2[Tier 2 — HIL, labgrid<br/>smoke nightly, timed suite<br/>gates P3/P4 exit]
+    T2 --> T3[Tier 3 — RF-level<br/>EVM, hop settling,<br/>phase coherence]
+    T3 --> V[capability advertised<br/>as validated]
+    T4[Tier 4 — CI] -.->|red nightly blocks<br/>matrix changes| V
+```
+
 ## Tier 1 — Simulation and unit (no hardware)
 
 - **REQ-TEST-001** — The SDK inherits Tick's descriptor-contract tests:

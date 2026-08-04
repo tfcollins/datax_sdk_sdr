@@ -1,7 +1,20 @@
 # Support Requirements
 
 What "supported" means here, so expectations are set before the first
-issue arrives.
+issue arrives. The whole page as one flow:
+
+```{mermaid}
+graph TD
+    I[issue arrives —<br/>datax-report output attached] --> S{status of<br/>the item?}
+    S -->|validated| F[fix-priority triage —<br/>completion log decides<br/>hardware vs API-use]
+    S -->|integration<br/>artifacts| BE[best-effort]
+    S -->|planned| RM[roadmap input]
+    F --> UP{root cause<br/>upstream?}
+    UP -->|converter driver| ADI[ADI Linux]
+    UP -->|scheduler IP| TK[Tick]
+    UP -->|NIC| CO[Corundum / mqnic]
+    UP -->|SDK| FX[fixed here]
+```
 
 ## Support tiers
 

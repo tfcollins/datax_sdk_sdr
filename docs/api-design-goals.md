@@ -43,6 +43,19 @@ Everything that fails the tests stays reachable through the raw
 `iio_context` escape hatch — hidden by default, never walled off
 ({doc}`non-goals`).
 
+The admission path every candidate verb walks:
+
+```{mermaid}
+graph TD
+    V[candidate verb] --> C{common across<br/>archetypes?}
+    C -->|no| ESC[stays behind the<br/>iio_context escape hatch]
+    C -->|yes| P{portable to both targets,<br/>or degrades via<br/>capability flag?}
+    P -->|no| ESC
+    P -->|yes| T{timeable — or documented<br/>untimeable with its<br/>command class?}
+    T -->|no| ESC
+    T -->|yes| IN[ships in libdatax —<br/>roughly twenty verbs]
+```
+
 ## The entire surface
 
 The proof of focus is that it fits in one table. Excluding

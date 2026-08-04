@@ -47,12 +47,12 @@ means nothing precludes them later.
 ADRV9361-Z7035 and ADRV9009-ZU11EG. Other ADI platforms (Pluto, FMCOMMS
 carriers, MxFE evaluation boards) are explicitly out of scope for v1, even
 where Tick already has collateral for them. The capability-flag model
-(:doc:`api-object-model`) is designed so new platforms are additive.
+({doc}`api-object-model`) is designed so new platforms are additive.
 
 ## No RF-sample-over-Ethernet in the MVP
 
 The Corundum integration ships as a NIC / control / telemetry plane first.
 Direct RF-sample packetization through the Corundum application section is
-a designed-but-deferred phase with its own gate in the :doc:`roadmap` —
+a designed-but-deferred phase with its own gate in the {doc}`roadmap` —
 the bandwidth budget and the required packetizer HDL are real engineering
 efforts, not configuration.

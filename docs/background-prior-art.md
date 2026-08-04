@@ -78,7 +78,7 @@ Tick's current maturity matters to this plan and is stated honestly
 throughout: the full path is validated end-to-end only on AD9081-FMCA-EBZ /
 ZCU102; the ADRV9009-ZU11EG has integration artifacts that are not yet
 hardware-validated; the ADRV9361-Z7035 has no Tick support at all today.
-See the platform pages and :doc:`roadmap`.
+See the platform pages and {doc}`roadmap`.
 
 ## Corundum: the network plane
 
@@ -96,7 +96,19 @@ SDK treats it accordingly: in the MVP, Corundum is the control/telemetry
 plane (remote iiod, event streams); direct RF-sample packetization through
 the Corundum application section is a designed-but-later roadmap phase.
 The bandwidth arithmetic that forces this phasing is worked through in
-:doc:`streaming-model`.
+{doc}`streaming-model`.
+
+The composition in one picture — three proven pieces, one new layer:
+
+```{mermaid}
+graph TD
+    APP[application — C or Python]
+    APP --> LD[libdatax —<br/>one radiohead API]
+    LD --> IIO[libiio<br/>transport + control]
+    LD --> TICK[Tick<br/>FPGA-resident timed commands]
+    LD --> COR[Corundum<br/>network plane]
+    IIO -.->|iio_context escape hatch,<br/>always available| APP
+```
 
 ## Positioning
 
@@ -110,7 +122,7 @@ The bandwidth arithmetic that forces this phasing is worked through in
 | Hardware | USRP only | Any ADI platform | ADI SDR platforms (2 initial targets) |
 | Language surface | C++ / Python | C / Python / others | C core + Python bindings |
 
-The intent is not UHD compatibility (see :doc:`non-goals`) — it is UHD
+The intent is not UHD compatibility (see {doc}`non-goals`) — it is UHD
 *parity of expressiveness* on the ADI stack, with libiio kept underneath as
 an escape hatch. What that expressiveness gap costs real missions — radar,
 EW, direction finding, communications — is worked through in
