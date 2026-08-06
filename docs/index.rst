@@ -66,6 +66,7 @@ collateral exists, not proven on silicon), *planned* (documented intent).
    :maxdepth: 2
    :caption: Concepts
 
+   start-here
    background-prior-art
    application-domains
    architecture-proposal
@@ -112,6 +113,7 @@ collateral exists, not proven on silicon), *planned* (documented intent).
 Where to start
 --------------
 
+* **New to SDR development?** Start with :doc:`start-here`.
 * **Why another SDK?** Read :doc:`background-prior-art`.
 * **What missions demand of it:** :doc:`application-domains`.
 * **How it all fits together:** :doc:`architecture-proposal`.
