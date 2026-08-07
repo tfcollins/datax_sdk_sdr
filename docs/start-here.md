@@ -128,6 +128,8 @@ ceilings on how short these programs must stay
 
 - **Why don't existing tools already do this?** The ecosystem gap —
   what UHD, libiio, and Tick each solve — is {doc}`background-prior-art`.
+- **What should arriving feel like?** The out-of-box target and the
+  processes that guard it, in {doc}`out-of-box-experience`.
 - **What do real missions demand?** Radar, EW, direction finding,
   and communications, worked from mission to requirement, in
   {doc}`application-domains`.

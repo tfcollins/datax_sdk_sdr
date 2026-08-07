@@ -67,6 +67,7 @@ collateral exists, not proven on silicon), *planned* (documented intent).
    :caption: Concepts
 
    start-here
+   out-of-box-experience
    background-prior-art
    application-domains
    architecture-proposal
