@@ -104,6 +104,7 @@ collateral exists, not proven on silicon), *planned* (documented intent).
    requirements-documentation
    requirements-support
    requirements-process
+   checklists
    roadmap
 
 .. toctree::

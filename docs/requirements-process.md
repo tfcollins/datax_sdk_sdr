@@ -49,12 +49,12 @@ A roadmap phase closes with a gate review, not a feeling:
 
 ## Every release
 
-The release checklist, in outline — the executable checklist is
-its own deliverable, derived from this page:
+The release checklist, in outline — the executable checklists live
+in {doc}`checklists`:
 
 - version pinning recorded: HDL release, Vivado version, kernel
-  commit, library versions, bitstream hash (the REQ-TEST-024
-  fields);
+  commit, bitstream hash (the REQ-TEST-024 fields) plus library
+  versions;
 - runbooks current on every shipped platform (REQ-DOC-004);
 - the newcomer walkthrough executed and timed on real hardware
   (REQ-OOBE-006/007, {doc}`out-of-box-experience`);
@@ -133,8 +133,8 @@ operationalizes.
   Every release runs the Every-release checklist; the completed
   checklist is archived with the release artifacts.
 - **REQ-PROC-010 — Drift checks in CI.** The symbol-coverage grep
-  and example execution run in CI from the first `libdatax`
-  release (REQ-DOC-001, REQ-DOC-006).
+  and example execution run in CI once `libdatax` code exists
+  (REQ-DOC-001, REQ-DOC-006).
 - **REQ-PROC-011 — Evidence linking.** Every *validated* label
   resolves to linked evidence within one click (REQ-DOC-003,
   REQ-TEST-023, REQ-HW-022).
