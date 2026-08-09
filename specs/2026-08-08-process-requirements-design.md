@@ -148,3 +148,14 @@ a schedule.
   files (sub-project 3).
 - Edits to the existing requirements pages (REQ-PROC cites them).
 - REQ prefix registry changes beyond introducing REQ-PROC.
+
+## Post-review follow-ups (final review 2026-08-09, non-blocking)
+
+Fold into sub-project 2 when the checklists work touches this page:
+
+- `requirements-process.md:56` — "library versions" is listed inside
+  "(the REQ-TEST-024 fields)" but REQ-TEST-024 names four fields;
+  reword to "the REQ-TEST-024 fields plus library versions".
+- `requirements-process.md:136` — REQ-PROC-010 says "from the first
+  `libdatax` release" but the drift section and REQ-DOC-006 say
+  "once code exists"; align to "once `libdatax` code exists".
