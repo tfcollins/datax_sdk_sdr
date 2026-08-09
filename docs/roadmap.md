@@ -3,6 +3,8 @@
 Seven phases. Each exits on acceptance criteria traced to
 {doc}`requirements-test` IDs; capabilities flip in the
 {doc}`api-object-model` matrix only at phase exit (REQ-TEST-042).
+The operating rhythm that runs these gates — per change, nightly,
+per phase, per release — is {doc}`requirements-process`.
 
 ```{mermaid}
 graph TD
