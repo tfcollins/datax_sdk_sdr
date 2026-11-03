@@ -1,9 +1,10 @@
 # Platform: ADRV9361-Z7035
 
-Zynq-7035 + AD9361 SOM. The smaller target — and the one where every SDK
-capability beyond plain streaming is **new work**. Full parity with the
-ZU11EG is a committed goal (roadmap P4/P5/P6), and this page is honest
-about what that costs.
+Zynq-7035 + AD9361 SOM. The smaller target. Tick and a 1G VITA 49.2
+path already exist for it in vrt49; the remaining work is RF
+qualification and the SDK surface. Full parity with the ZU11EG is a
+committed goal (roadmap P4/P5/P6), and this page is honest about what
+that costs.
 
 ## Board summary
 
@@ -24,27 +25,40 @@ about what that costs.
 
 - Stock ADI HDL reference design (`adrv9361z7035`) and Linux support —
   the P2 streaming MVP needs nothing new.
-- **No Tick support.** The closest analogue is Tick's ADALM-Pluto port
-  (Zynq-7010 + AD9363): same AD936x family, same fastlock CTRL_IN GPIO
-  hop mechanism. That port is itself at *integration artifacts* maturity
-  — the analogue de-risks the design, not the schedule.
-- **No Corundum wrapper** for this board exists anywhere — no ethernet
-  PHY wrapper, no board top-level, no pinout.
+- **Tick in the vrt49 1G SFP design** (`adrv9361z7035_vrt49_sfp`): the
+  vendored `axi_timed_command_scheduler`, and `vrt49_ad9361_hop_ctrl`
+  at `0x44AB0000` driving the AD9361 `fastlock_select` pins from
+  `gpio_out` and gating the framer's sample admission, with hop
+  metadata (frequency, epoch) carried in Context packets.
+  `adrv9361_tick_hop.py` preloads a fastlock bank of at most eight
+  frequencies and submits absolute-time GPIO events. `pps_in` is tied
+  low, so Tick time is reset-relative only. See the vrt49
+  [Tick hop tutorial](https://github.com/tfcollins/vrt49/blob/main/doc/source/tutorials/adrv9361-tick-examples.md)
+  (private repository).
+- **Evidence boundary, stated by vrt49**: control and Context/IQ
+  transport passed qualification on hardware; an independent
+  RF-measured hop settle has **not** been established. Status:
+  *integration artifacts*.
+- **1G SFP network path** (1000BASE-X; `vrt49_frame_throttle` fits
+  61.44 MSPS onto 1G; GPSDO 1PPS timestamping) and a CCFMC LVDS variant
+  to host DMA. There is no Corundum port for this board and no 10G
+  path. See the vrt49
+  [project page](https://github.com/tfcollins/vrt49/blob/main/doc/source/projects/adrv9361z7035_sfp.md)
+  (private repository).
 
-## New work 1 — Tick port (roadmap P4)
+## Remaining Tick work (roadmap P4)
 
-HDL scope, scaled from the Pluto port:
+What vrt49 does not yet provide:
 
-1. Instantiate `axi_timed_command_scheduler` +
-   `tick_stream_timestamp_tag` in the `adrv9361z7035` project TCL
-   (address assignment following Tick's per-board pattern).
-2. Wire `gpio_out[3:0]` → AD9361 CTRL_IN (fastlock profile select);
-   board XDC for the chosen carrier's pins.
-3. Insert stream gates and the timestamp tagger into the LVDS RX/TX
-   datapath; wire `CAPTURE_ARM`/`TRANSMIT_ARM` sync outputs to the
-   `data_offload` `sync_ext` inputs.
-4. Devicetree node per Tick's binding
-   (`adi,axi-timed-command-scheduler-1.0`).
+1. RF-measured fastlock settle (REQ-TEST-031) with scope or spectrum
+   evidence.
+2. `tick_stream_timestamp_tag` and `CAPTURE_ARM`/`TRANSMIT_ARM` wiring
+   to the `data_offload` `sync_ext` inputs, so the DMA path has the
+   same `RX_ARM`/`TX_ARM`/`STREAM_GATE`/`TIMESTAMPS` semantics as the
+   ZU11EG — or a decision that the VRT framer path is the SDK's
+   streaming path on this board.
+3. An external PPS route for `pps_in`.
+4. The runbook (REQ-DOC-004).
 
 Acceptance criteria (traced in {doc}`requirements-test`):
 
@@ -54,14 +68,16 @@ Acceptance criteria (traced in {doc}`requirements-test`):
 - fastlock hop scan: settling within AD9361 fastlock spec, hops confirmed
   on-time through the completion path.
 
-## New work 2 — network offload path (roadmap P5, highest-risk)
+## 10G offload path (roadmap P5, still highest-risk)
 
-The honest hard part. Z7035 GTX lanes can carry 10GBASE-R, but nothing
-is shipped: a Corundum port for this board means a new ethernet wrapper
-(PHY on GTX), a board top-level integration, carrier pinout for
-SFP/FMC-mounted cages, and resource-fit work in a fabric much smaller
-than the ZU11EG's. It is scheduled as its own phase gate and explicitly
-allowed to slip without dragging P4 parity ({doc}`roadmap`).
+The honest hard part. The 1G SFP path is shipped and bounded to
+61.44 MSPS throttled; 10G on the FMC carrier's GTX lanes is the
+unshipped part. Z7035 GTX lanes can carry 10GBASE-R, but a Corundum
+port for this board means a new ethernet wrapper (PHY on GTX), a board
+top-level integration, carrier pinout for SFP/FMC-mounted cages, and
+resource-fit work in a fabric much smaller than the ZU11EG's. It is
+scheduled as its own phase gate and explicitly allowed to slip without
+dragging P4 parity ({doc}`roadmap`).
 
 **MVP fallback, stated plainly:** PS GigE carries control and telemetry
 (`NET_OFFLOAD_NIC` absent); streaming stays on the DMA path. Every SDK
@@ -74,4 +90,7 @@ See the canonical matrix in {doc}`api-object-model`. Summary: streaming
 at P2; `TIMED_COMMANDS`/`RX_ARM`/`TX_ARM`/`STREAM_GATE`/`TIMESTAMPS`/
 `FASTLOCK_HOP` at P4; `NET_OFFLOAD_NIC` at P5 (new wrapper);
 `NET_OFFLOAD_SAMPLES` at P6, channel/rate subsets only. `FHM_HOP`, `MCS`,
-`PHASE_COHERENT` are structurally n/a (single chip).
+`PHASE_COHERENT` are structurally n/a (single chip). Infrastructure
+status per row is in {doc}`support-matrix`: `TIMED_COMMANDS` and
+`FASTLOCK_HOP` infrastructure is at *integration artifacts*; the
+DMA-path gate and timestamp rows have no infrastructure yet.
