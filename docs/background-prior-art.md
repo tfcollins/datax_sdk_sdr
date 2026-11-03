@@ -75,10 +75,11 @@ model, iverilog testbench, RTL, Linux IIO driver, and libiio clients — the
 contract this SDK builds on.
 
 Tick's current maturity matters to this plan and is stated honestly
-throughout: the full path is validated end-to-end only on AD9081-FMCA-EBZ /
-ZCU102; the ADRV9009-ZU11EG has integration artifacts that are not yet
-hardware-validated; the ADRV9361-Z7035 has no Tick support at all today.
-See the platform pages and {doc}`roadmap`.
+throughout: the full path is validated end-to-end on AD9081-FMCA-EBZ /
+ZCU102 and on the ADRV9009-ZU11EG (scheduler and timed FHM hop); on the
+ADRV9361-Z7035 Tick ships inside vrt49's 1G SFP design at
+integration-artifacts maturity. See {doc}`support-matrix`, the platform
+pages and {doc}`roadmap`.
 
 ## Corundum: the network plane
 

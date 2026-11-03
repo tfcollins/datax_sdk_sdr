@@ -108,12 +108,14 @@ SDK exposes this as schedulable gate windows on a running stream —
 block for TDD frames and burst duty cycles. `TDD_SYNC` alignment of an
 `axi_tdd` instance (where fitted) rides the same mechanism.
 
-## Roadmap: Corundum RF-sample offload
+## RF-sample offload (vrt49 today, SDK surface on the roadmap)
 
 The end state moves samples fabric → Ethernet without touching PS DDR: a
 packetizer in Corundum's application section consumes tagged samples and
 sources VITA-49-style frames (device timestamp, stream ID, sequence
-numbers) into the NIC datapath.
+numbers) into the NIC datapath. vrt49's `axi_vrt49_framer` implements
+this on the ZU11EG and hopcap exercises it; the figure and the datapath
+pages below remain the block-level description.
 
 ```{eval-rst}
 .. raw:: html
@@ -134,9 +136,9 @@ The bandwidth arithmetic that gates this phase:
   beyond a single 10 G port. Mitigations, in design order: channel/rate
   subsets, sample-width packing (12/8-bit modes), and the QSFP+ cage's
   4-lane / 25 G-per-lane headroom (a Corundum-side project of its own).
-- Z7035 GTX lanes top out lower and the board has no shipped Corundum
-  wrapper at all — its offload story is bounded to subsets from day one
-  ({doc}`platform-adrv9361-z7035`).
+- Z7035 GTX lanes top out lower; the shipped path is vrt49's 1G SFP
+  design at 61.44 MSPS throttled, with no 10G — its offload story is
+  bounded to subsets from day one ({doc}`platform-adrv9361-z7035`).
 
 Header budget target: ≤ 2 % overhead — met at 0.9 % with the standard
 2048-sample payload on a jumbo-frame point-to-point link; the frame
@@ -145,5 +147,5 @@ layout is specified in {doc}`vrt-frame-format`.
 **What Corundum does in the MVP, meanwhile:** the NIC is the control and
 telemetry plane — remote iiod over the fabric NIC, SDK event/telemetry
 streams, and a PTP-capable substrate for a post-v1 timing phase. Sample
-data stays on the DMA path until the packetizer phase clears its gates in
-the {doc}`roadmap`.
+data moves on either path; the SDK's P6 exit in the {doc}`roadmap` is
+the `libdatax` surface over the vrt49 path.

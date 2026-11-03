@@ -36,15 +36,15 @@ Baseline constraints the design preserves and states honestly:
 
 - The stock ADI JESD204 / LVDS, AXI-DMAC, `data_offload`, IIO, libiio,
   and pyadi-iio paths remain intact. The SDK adds; it does not fork.
-- Tick is validated end-to-end only on AD9081-FMCA-EBZ / ZCU102
-  (`hdl_2023_r2`). The ADRV9009-ZU11EG has unvalidated integration
-  artifacts; the ADRV9361-Z7035 has no Tick support today.
-- `hdl_2026_r1` / Vivado 2025.1 carries an open cache-coherency
-  regression (fix in flight, hardware-unconfirmed). The ZU11EG Corundum
-  variant needs `hdl_2026_r1`; Tick's validated base is `hdl_2023_r2`.
-  This fork is a named decision gate in the {doc}`roadmap`.
+- Tick is validated end-to-end on AD9081-FMCA-EBZ / ZCU102 and on the
+  ADRV9009-ZU11EG (scheduler and timed FHM hop); on the ADRV9361-Z7035
+  it ships inside vrt49's 1G SFP design at integration-artifacts
+  maturity ({doc}`support-matrix`).
+- The `hdl_2026_r1` / Vivado 2025.1 cache-coherency issue is resolved;
+  Tick and the ZU11EG Corundum variant share that release.
 - Corundum in the upstream ZU11EG design is a QSFP+ 10 Gb/s **NIC**
-  parallel to the JESD datapath — not a sample transport.
+  parallel to the JESD datapath. vrt49 adds the VITA 49.2 framer in
+  front of it, so on the ZU11EG the NIC *is* a sample transport today.
 - The Tick Linux driver submits one descriptor per sysfs attribute write
   and polls a one-entry completion window. The API is shaped so this
   bottleneck is hidden today and replaceable tomorrow
@@ -98,9 +98,9 @@ AXI-DMAC framework, and (where fitted) the Corundum `mqnic` netdev.
 **FPGA fabric** — the stock reference design (JESD204 or LVDS link layer,
 `util_cpack`/`upack`, `data_offload`, `axi_dmac`) plus the Tick
 `axi_timed_command_scheduler` and `tick_stream_timestamp_tag` IPs, and on
-network-fitted builds the Corundum NIC core. The future VITA-49
-packetizer sits in Corundum's application section (dashed in the figure —
-roadmap, not MVP).
+network-fitted builds the Corundum NIC core. The VITA 49.2 packetizer
+is vrt49's `axi_vrt49_framer` (and deframer for TX); it is dashed in
+the figure because the SDK does not expose it yet.
 
 **RF** — AD9361 (2R2T, LVDS) on the Z7035; dual ADRV9009 (JESD204B) with
 HMC7044 clocking on the ZU11EG.
@@ -152,7 +152,7 @@ graph RL
     SCHED[Tick scheduler] -. "TRANSMIT_ARM @ T" .-> OFFL
 ```
 
-## Data Plane (Roadmap: RF sample offload)
+## Data Plane (delivered infrastructure, SDK surface on the roadmap)
 
 The "radiohead over the network" end state: a packetizer in Corundum's
 application section takes tagged samples straight from fabric, wraps them
@@ -161,12 +161,15 @@ the NIC datapath — the host receives line-rate sample streams on a
 standard (or DPDK-accelerated) network stack, with the PS DDR bounce
 removed.
 
-This is deliberately **not** in the MVP. The arithmetic: 2 channels of
-16-bit I/Q at 61.44 MSPS, RX+TX, is ≈ 7.86 Gb/s before framing overhead —
-marginal on one 10 G link, and that is the *smaller* platform's native
-rate. The phase gates, header budget, and per-platform channel limits are
-worked in {doc}`streaming-model`; the Corundum-side scope is in the
-platform pages.
+The packetizer, the 10G path and a host receiver exist: vrt49's framer
+on the ZU11EG, exercised end to end by hopcap, and libiio's `daqiri:`
+backend on the host (DAQIRI socket engine today, raw engines for 100G
+in progress). The SDK's data-plane work is the API surface over them.
+The arithmetic still bounds the design: 2 channels of 16-bit I/Q at
+61.44 MSPS, RX+TX, is ≈ 7.86 Gb/s before framing overhead — marginal on
+one 10 G link, and that is the *smaller* platform's native rate. The
+phase gates, header budget, and per-platform channel limits are worked
+in {doc}`streaming-model`; the per-board scope is in the platform pages.
 
 In the MVP, Corundum-fitted builds still earn their place: the NIC is the
 control and telemetry plane (remote iiod sessions, event/telemetry

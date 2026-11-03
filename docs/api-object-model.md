@@ -152,6 +152,12 @@ Capabilities by platform *and phase* — the phase gates are defined in the
 | `NET_OFFLOAD_NIC` | P5 — new GTX wrapper (highest-risk) | P5 — upstream `CORUNDUM=1` exists |
 | `NET_OFFLOAD_SAMPLES` | P6 — subsets only | P6 |
 
-"P*n*" = the capability turns on when that roadmap phase exits its
-acceptance criteria on that platform; "—" = structurally not applicable.
-Full API parity between the two boards is the P4 exit milestone.
+"P*n*" = the capability turns on in `libdatax` when that roadmap phase
+exits its acceptance criteria on that platform; "—" = structurally not
+applicable. Full API parity between the two boards is the P4 exit
+milestone. The **infrastructure** behind each cell — what tick, vrt49
+and hopcap prove today — is tracked per repository in
+{doc}`support-matrix`: on the ZU11EG every P3, P5 and P6 row has
+validated infrastructure; on the Z7035 the P4 rows are at integration
+artifacts. A cell flips only when both the infrastructure row and the
+SDK suite (REQ-TEST-042) are green.
