@@ -1,0 +1,27 @@
+[project]
+name = "datax-support"
+version = "0.1.0"
+description = "Check and render DataX SDR support manifests"
+requires-python = ">=3.11"
+dependencies = ["jsonschema>=4.20"]
+
+[project.scripts]
+datax-support = "datax_support.cli:main"
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "tools"}
+packages = ["datax_support", "datax_support.data"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"datax_support.data" = ["*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tools/tests"]

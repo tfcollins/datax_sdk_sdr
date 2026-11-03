@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "repos": ["tick", "vrt49", "libiio", "hopcap", "sdk"],
+  "statuses": ["planned", "integration-artifacts", "validated"],
+  "platforms": {
+    "ad9081-zcu102": {"name": "AD9081-FMCA-EBZ / ZCU102"},
+    "adrv9009-zu11eg": {"name": "ADRV9009-ZU11EG / ADRV2CRR-FMC"},
+    "adrv9009-zc706": {"name": "ADRV9009 / ZC706"},
+    "adrv9361-z7035": {"name": "ADRV9361-Z7035"},
+    "adrv9002-zcu102": {"name": "ADRV9002 / ZCU102"},
+    "fmcomms2-zcu102": {"name": "AD-FMCOMMS2 / ZCU102"},
+    "vcu118-daq3": {"name": "VCU118 + FMCDAQ3"},
+    "pluto": {"name": "ADALM-Pluto"},
+    "host": {"name": "host"}
+  },
+  "features": {
+    "streaming-rx": {"name": "immediate RX streaming"},
+    "streaming-tx": {"name": "immediate TX streaming"},
+    "timed-gpio": {"name": "timed GPIO"},
+    "timed-capture": {"name": "timed capture"},
+    "stream-gate": {"name": "stream gate"},
+    "timestamps": {"name": "timestamps"},
+    "fhm-hop": {"name": "Talise FHM hop"},
+    "fastlock-hop": {"name": "AD936x fastlock hop"},
+    "mcs": {"name": "multi-chip sync"},
+    "vrt-udp-1g": {"name": "VITA 49.2 over UDP, 1G"},
+    "vrt-udp-10g": {"name": "VITA 49.2 over UDP, 10G"},
+    "vrt-udp-100g": {"name": "VITA 49.2 over UDP, 100G"},
+    "vrt-rocev2-100g": {"name": "VITA 49.2 over RoCEv2, 100G"},
+    "vrt-dma": {"name": "VITA 49.2 framing to host DMA"},
+    "corundum-nic": {"name": "Corundum NIC"},
+    "daqiri-rx-socket": {"name": "DAQIRI receive, socket engine"},
+    "daqiri-rx-raw": {"name": "DAQIRI receive, raw DPDK/ibverbs"},
+    "iiod-udp-stream": {"name": "iiod UDP stream setup"}
+  },
+  "capability_platforms": ["adrv9361-z7035", "adrv9009-zu11eg"],
+  "capabilities": {
+    "Streaming (immediate)": {"features": ["streaming-rx", "streaming-tx", "vrt-dma"]},
+    "TIMED_COMMANDS": {"features": ["timed-gpio"]},
+    "RX_ARM": {"features": ["timed-capture"]},
+    "TX_ARM": {"features": []},
+    "STREAM_GATE": {"features": ["stream-gate"]},
+    "TIMESTAMPS": {"features": ["timestamps"]},
+    "FASTLOCK_HOP": {"features": ["fastlock-hop"]},
+    "FHM_HOP": {"features": ["fhm-hop"]},
+    "MCS": {"features": ["mcs"]},
+    "PHASE_COHERENT": {"features": ["mcs"]},
+    "NET_OFFLOAD_NIC": {"features": ["corundum-nic"]},
+    "NET_OFFLOAD_SAMPLES": {"features": ["vrt-udp-10g", "vrt-udp-1g", "vrt-udp-100g", "vrt-rocev2-100g"]}
+  }
+}
