@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "note": "Pinned sources of the support manifests rendered into docs/_generated/. Bump a revision and re-run `datax-support render --sources sources.json --out docs/_generated` in the same commit. `private` sources are fetched with SUPPORT_READ_TOKEN.",
+  "sources": {
+    "tick": {
+      "repository": "tfcollins/tick",
+      "branch": "main",
+      "revision": "36bfac8e308554a17ab715c0d4a98a4deb22381b",
+      "path": "support.json",
+      "private": true,
+      "why": "support-manifest PR tfcollins/tick#36 head"
+    },
+    "vrt49": {
+      "repository": "tfcollins/vrt49",
+      "branch": "main",
+      "revision": "ee9df48d7497c2d40464cb7344e879898e199071",
+      "path": "support.json",
+      "private": true,
+      "why": "support-manifest PR tfcollins/vrt49#69 head"
+    },
+    "libiio": {
+      "repository": "tfcollins/libiio",
+      "branch": "feature/daqiri-udp",
+      "revision": "fed803b964d5b1954d76801bf6042352043dcbd8",
+      "path": "CI/daqiri/support.json",
+      "private": false,
+      "why": "daqiri-support-manifest PR tfcollins/libiio#3 head"
+    },
+    "hopcap": {
+      "repository": "tfcollins/hopcap",
+      "branch": "main",
+      "revision": "dd963797b10fadf751261ae0d230b1aa7d4ddb17",
+      "path": "support.json",
+      "private": false,
+      "why": "support-manifest PR tfcollins/hopcap#3 head"
+    }
+  }
+}

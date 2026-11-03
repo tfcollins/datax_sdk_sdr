@@ -164,3 +164,10 @@ and `PHASE_COHERENT` have none yet; on the Z7035, `TIMED_COMMANDS` and
 `FASTLOCK_HOP` are at integration artifacts and the rest is planned.
 A cell flips only when both the infrastructure row and the SDK suite
 (REQ-TEST-042) are green.
+
+Infrastructure status per cell, rendered from the repositories'
+manifests (best status over the features mapped to each capability;
+"—" means no repository claims a row yet):
+
+```{include} _generated/capability-infrastructure.md
+```

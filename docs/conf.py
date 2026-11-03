@@ -26,4 +26,6 @@ html_theme_options = {
 }
 html_static_path = ["_static"]
 html_css_files = ["css/theme-image-swap.css"]
-exclude_patterns = ["_build"]
+# _generated/ holds table fragments rendered by `datax-support render`; they are
+# pulled into pages with {include} and must not be treated as orphan documents.
+exclude_patterns = ["_build", "_generated"]
