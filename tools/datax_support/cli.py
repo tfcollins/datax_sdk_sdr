@@ -74,7 +74,20 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--token-env", default="SUPPORT_READ_TOKEN")
     r.add_argument("--branch-tips", action="store_true", help="fetch branch tips, not pins")
     r.set_defaults(func=_cmd_render)
+
+    n = sub.add_parser("nightly", help="drift, red-workflow and dead-link report (advisory)")
+    n.add_argument("--sources", required=True)
+    n.add_argument("--generated", default="docs/_generated", help="committed fragments to diff against")
+    n.add_argument("--out", required=True, help="markdown report path")
+    n.add_argument("--token-env", default="SUPPORT_READ_TOKEN")
+    n.set_defaults(func=_cmd_nightly)
     return p
+
+
+def _cmd_nightly(args: argparse.Namespace) -> int:
+    from .nightly import run_cli
+
+    return run_cli(args.sources, args.generated, args.out, args.token_env)
 
 
 def main(argv: list[str] | None = None) -> int:
