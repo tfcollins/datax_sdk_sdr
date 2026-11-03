@@ -16,7 +16,14 @@ Status: approved; sub-projects A and B implemented 2026-11-03
   libiio [#3](https://github.com/tfcollins/libiio/pull/3) (against
   `feature/daqiri-udp`, green), hopcap [#3](https://github.com/tfcollins/hopcap/pull/3)
   (green).
-  `datax_sdk_sdr` made public 2026-11-03. Open until the owner acts:
+  `datax_sdk_sdr` made public 2026-11-03.
+- Sub-project C: GitHub project "DataX SDR",
+  <https://github.com/users/tfcollins/projects/4>, fields Codebase
+  (GitHub reserves "Repo"), Platform, Phase, Priority, Requirement;
+  linked to the five repositories; seeded with issues #2–#20 in this
+  repo plus the pre-existing #1 by `tools/seed_project.py`
+  (idempotent; plan `plans/2026-11-03-github-project-seed.md`).
+- Open until the owner acts:
   the `SUPPORT_READ_TOKEN` secret (the `support-render` CI job and the
   nightly need it for tick and vrt49), merging the four PRs and
   re-pinning `sources.json` to the merge commits.
