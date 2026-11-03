@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "project": "libiio",
+  "platforms": {
+    "host": {
+      "features": {
+        "daqiri-rx-socket": {
+          "status": "validated",
+          "tier": 1,
+          "workflow": "hardware.yml",
+          "evidence": "https://github.com/tfcollins/libiio/blob/feature/daqiri-udp/doc/source/daqiri-backend.md"
+        }
+      }
+    }
+  }
+}

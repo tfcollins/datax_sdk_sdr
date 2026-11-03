@@ -32,3 +32,9 @@ def test_check_integration_artifacts_requires_evidence(fix, tmp_repo):
 
 def test_check_planned_allows_no_tier(fix, tmp_repo):
     assert check_manifest(fix / "planned-only.json", tmp_repo) == []
+
+
+def test_check_software_only_allows_tier_1(fix, tmp_repo):
+    assert check_manifest(fix / "software-only.support.json", tmp_repo) == []
+    errs = check_manifest(fix / "bad-software-tier.json", tmp_repo)
+    assert any("tier >= 2" in e for e in errs)
