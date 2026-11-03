@@ -88,7 +88,7 @@ before the page says "validated".
 | tick | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | Scheduler and timed Talise FHM hop validated closed-loop (5/5 edges, 0-tick skew), `hdl_2026_r1` | `tron-repeat-hil.yml`, STATUS 2026-08-04 |
 | tick | ADRV9009 / ZC706 | Scheduler validated on silicon, `hdl_2023_r2`; FHM hop is a follow-up | README |
 | tick | ADALM-Pluto | Integration artifacts, AD9361 fastlock hop | README |
-| tick | `hdl_2026_r1` coherency regression | **Resolved**: validated with one deliberate deviation from stock | README release note |
+| tick | `hdl_2026_r1` coherency regression | **Resolved**: validated; the one deliberate deviation from stock (`CACHE_COHERENCY` off) is in Tick's ZCU102 flow only, the ZU11EG project builds stock | README release note, `scripts/prepare_adi_hdl.py` |
 | vrt49 | ADRV9009-ZU11EG, Corundum 10G SFP+/QSFP+ | Reference design builds in CI; software HIL suite nightly over labgrid; Corundum-image tests opt-in | `hdl-corundum.yml`, `hw-test.yml` |
 | vrt49 | ADRV9361-Z7035, 1G SFP | Reference design with vendored Tick scheduler, `vrt49_ad9361_hop_ctrl` driving AD9361 `fastlock_select` and gating the framer's sample admission; `adrv9361_tick_hop.py`; kernel modules and bitstream built in CI; software HIL covers the board. Control and Context/IQ transport passed qualification on hardware; **RF-measured hop settling is unresolved** (vrt49 tutorial says so explicitly). No `tick_stream_timestamp_tag`: timestamps come from the VRT framer. | `hdl-adrv9361-sfp.yml`, `system_bd.tcl`, `adrv9361-tick-examples.md` |
 | vrt49 | ADRV9361-Z7035, CCFMC LVDS | Reference design checked in; no HIL evidence found | projects page |

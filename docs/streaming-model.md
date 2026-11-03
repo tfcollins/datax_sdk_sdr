@@ -137,8 +137,9 @@ The bandwidth arithmetic that gates this phase:
   subsets, sample-width packing (12/8-bit modes), and the QSFP+ cage's
   4-lane / 25 G-per-lane headroom (a Corundum-side project of its own).
 - Z7035 GTX lanes top out lower; the shipped path is vrt49's 1G SFP
-  design at 61.44 MSPS throttled, with no 10G — its offload story is
-  bounded to subsets from day one ({doc}`platform-adrv9361-z7035`).
+  design, which at 61.44 MSPS forwards one frame in three (about
+  0.68 Gb/s on the wire), with no 10G — its offload story is bounded
+  to subsets from day one ({doc}`platform-adrv9361-z7035`).
 
 Header budget target: ≤ 2 % overhead — met at 0.9 % with the standard
 2048-sample payload on a jumbo-frame point-to-point link; the frame

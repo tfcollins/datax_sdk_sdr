@@ -39,8 +39,9 @@ that costs.
   transport passed qualification on hardware; an independent
   RF-measured hop settle has **not** been established. Status:
   *integration artifacts*.
-- **1G SFP network path** (1000BASE-X; `vrt49_frame_throttle` fits
-  61.44 MSPS onto 1G; GPSDO 1PPS timestamping) and a CCFMC LVDS variant
+- **1G SFP network path** (1000BASE-X; at 61.44 MSPS the
+  `vrt49_frame_throttle` forwards one frame in three, about 0.68 Gb/s
+  on the wire; GPSDO 1PPS timestamping) and a CCFMC LVDS variant
   to host DMA. There is no Corundum port for this board and no 10G
   path. See the vrt49
   [project page](https://github.com/tfcollins/vrt49/blob/main/doc/source/projects/adrv9361z7035_sfp.md)
@@ -70,9 +71,9 @@ Acceptance criteria (traced in {doc}`requirements-test`):
 
 ## 10G offload path (roadmap P5, still highest-risk)
 
-The honest hard part. The 1G SFP path is shipped and bounded to
-61.44 MSPS throttled; 10G on the FMC carrier's GTX lanes is the
-unshipped part. Z7035 GTX lanes can carry 10GBASE-R, but a Corundum
+The honest hard part. The 1G SFP path is shipped and forwards one
+frame in three at 61.44 MSPS (about 0.68 Gb/s on the wire); 10G on the
+FMC carrier's GTX lanes is the unshipped part. Z7035 GTX lanes can carry 10GBASE-R, but a Corundum
 port for this board means a new ethernet wrapper (PHY on GTX), a board
 top-level integration, carrier pinout for SFP/FMC-mounted cages, and
 resource-fit work in a fabric much smaller than the ZU11EG's. It is

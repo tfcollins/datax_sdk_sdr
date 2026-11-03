@@ -157,7 +157,10 @@ exits its acceptance criteria on that platform; "—" = structurally not
 applicable. Full API parity between the two boards is the P4 exit
 milestone. The **infrastructure** behind each cell — what tick, vrt49
 and hopcap prove today — is tracked per repository in
-{doc}`support-matrix`: on the ZU11EG every P3, P5 and P6 row has
-validated infrastructure; on the Z7035 the P4 rows are at integration
-artifacts. A cell flips only when both the infrastructure row and the
-SDK suite (REQ-TEST-042) are green.
+{doc}`support-matrix`: on the ZU11EG, `TIMED_COMMANDS`, `FHM_HOP` and
+the P5/P6 network rows have validated infrastructure, `STREAM_GATE`
+and `TIMESTAMPS` on the VRT path only, and `RX_ARM`/`TX_ARM`, `MCS`
+and `PHASE_COHERENT` have none yet; on the Z7035, `TIMED_COMMANDS` and
+`FASTLOCK_HOP` are at integration artifacts and the rest is planned.
+A cell flips only when both the infrastructure row and the SDK suite
+(REQ-TEST-042) are green.
