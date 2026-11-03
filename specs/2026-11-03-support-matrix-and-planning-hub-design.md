@@ -1,7 +1,7 @@
 # Design: Support Matrix and Planning Hub
 
 Date: 2026-11-03
-Status: draft for approval
+Status: approved; sub-project A implemented 2026-11-03
 Location note: specs live at repo root (`specs/`); `docs/` is Sphinx
 source and `-W` rejects orphan pages.
 
