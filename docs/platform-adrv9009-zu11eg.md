@@ -1,8 +1,9 @@
 # Platform: ADRV9009-ZU11EG
 
 ZU11EG SOM + dual ADRV9009 on the ADRV2CRR-FMC carrier. The full-featured
-reference target: JESD204B, HMC7044 clocking, QSFP+, and the only board
-with an upstream Corundum variant today.
+reference target: JESD204B, HMC7044 clocking, QSFP+, and the board on
+which the whole stack is proven: Tick, vrt49's Corundum 10G VITA 49.2
+path, and the hopcap application.
 
 ## Board summary
 
@@ -23,57 +24,64 @@ with an upstream Corundum variant today.
 
 - Stock ADI HDL reference design + Linux (JESD204-FSM) support — P2
   streaming needs nothing new.
-- **Corundum NIC, upstream**: `make CORUNDUM=1` on
-  `projects/adrv9009zu11eg/adrv2crr_fmc` (`hdl_2026_r1`) builds a QSFP+
-  10 Gb/s NIC (CSR at `0xA000_0000`, dedicated DTS) parallel to the JESD
-  datapath. Built from a pinned sibling clone of upstream Corundum.
-- **Tick integration artifacts, not validated**: project TCL dropping the
-  scheduler at BD `0x4600_0000` (PS-physical `0x8600_0000`), FHM-pin
-  XDC, and a devicetree overlay exist in the Tick repo — none of it has
-  run on silicon. Tick's validated base is AD9081/ZCU102.
+- **Tick, validated on `tron`** (`hdl_2026_r1`, Vivado 2025.1):
+  scheduler at PS-physical `0x8600_0000`, measured 99.9989 MHz tick
+  rate, JTAG production boot with the Tick PL in place before Linux
+  and the dual-Talise JESD stack healthy alongside it; timed Talise FHM
+  hop validated closed-loop — 5/5 edges, 0-tick skew, exact PLL
+  readback — via the internal `TAL_GPIO_0` route. Evidence:
+  [ZU11EG bring-up](https://tfcollins.github.io/tick/adrv9009-zu11eg-bringup.html),
+  [FHM hop](https://tfcollins.github.io/tick/adrv9009-fhm-hop.html).
+- **vrt49 Corundum 10G path**: the `adrv9009zu11eg_vrt49_corundum`
+  reference design places the VITA 49.2 framer between `util_cpack2`
+  and `axi_dmac`, streams IF Data over UDP on QSFP lane 0, and pairs
+  with `iiod-vrt49` on the target and the `vrt49://` libiio backend on
+  the host. The software path runs nightly over labgrid; tests against
+  the Corundum image are opt-in. Evidence:
+  [project page](https://github.com/tfcollins/vrt49/blob/main/doc/source/projects/adrv9009zu11eg.md)
+  (private repository).
+- **hopcap, end to end**: Tick fires the FHM GPIO; `vrt49_fhm_hop_ctrl`
+  closes sample admission, waits a settle delay, emits a hardware
+  Context packet carrying the hop frequency and epoch, then opens a
+  capture window; data leaves over QSFP and the host writes SigMF with
+  sample-exact VRT timestamps. Runs nightly. Evidence:
+  [first tron run](https://tfcollins.github.io/hopcap/reports/2026-10-23-tron-first-run.html),
+  [VRT timestamps](https://tfcollins.github.io/hopcap/reports/2026-10-25-tron-vrt-timestamps.html).
 - Related, in progress elsewhere: mainlining-quality `mqnic` driver work
-  (netdev/NAPI/devlink/PTP) in the corundum-zcu102-fmcomms2 effort —
-  this SDK plans against that driver landing, not against the private
-  raw-MMIO interface.
+  (netdev/NAPI/devlink/PTP) in the corundum-zcu102-fmcomms2 effort. The
+  SDK plans against that driver for the NIC-as-control-plane use; the
+  sample path above does not depend on it.
 
-## The release fork (named risk)
+## The release fork (resolved)
 
-Tick's hardware validation lives on `hdl_2023_r2` / Vivado 2023.2; the
-Corundum variant lives on `hdl_2026_r1` / Vivado 2025.1 — which currently
-carries an **open cache-coherency regression** (ZCU102-diagnosed:
-`CACHE_COHERENCY`/`dma-coherent`/FSBL AFIFM mismatch; fix in flight,
-hardware-unconfirmed). Decision gate in the {doc}`roadmap`:
+Tick's validated base on this board is `hdl_2026_r1` / Vivado 2025.1,
+with one deliberate deviation from stock in the cache-coherency
+configuration, documented in Tick's README release note. The regression
+gate that the {doc}`roadmap` once carried is closed: Tick, the vrt49
+Corundum design and hopcap's combined bitstream all build from the same
+release.
 
-- regression fixed → single `hdl_2026_r1` design carries Tick + Corundum;
-- regression persists → P3 ships timed control on `hdl_2023_r2` *without*
-  Corundum, and P5 waits. Timed control does not hostage the NIC, nor
-  vice versa.
+## Tick hardware validation (done)
 
-## New work 1 — Tick hardware validation (roadmap P3)
+The acceptance ladder the SDK asked for — driver probe, timed GPIO,
+timed capture with tick-exact timestamps, scheduler-triggered Talise FHM
+hop — is passed; the evidence is linked above and summarised in
+{doc}`support-matrix`. What remains for the SDK is exposing it through
+`libdatax` (P3 as re-baselined in {doc}`roadmap`) and the scope-evidence
+staircase against PPS (REQ-TEST-023) that Tick's `tron` suite does not
+yet produce.
 
-Bring-up of the existing artifacts on the lab unit (labgrid place
-`tron`): build the chosen HDL base with the Tick TCL, boot, driver
-probe, then the acceptance ladder — timed-GPIO staircase with scope
-evidence, timed capture with tick-exact timestamps, Talise FHM hop
-triggered by the scheduler with settling measurement
-({doc}`requirements-test`).
+## Network and sample plane (delivered by vrt49, exercised by hopcap)
 
-## New work 2 — Tick + Corundum coexistence (roadmap P5)
-
-One design fitting both: address-map audit (Tick at `0x8600_0000`, mqnic
-CSR at `0xA000_0000` — no conflict on paper; IRQ routing to be
-re-verified), fabric resource budget with the NIC's BRAM/logic appetite,
-and clock-domain review (Corundum's 250 MHz datapath vs Tick's 100 MHz
-tick clock vs JESD device clocks).
-
-## New work 3 — VITA-49 packetizer (roadmap P6)
-
-The Corundum application-section packetizer specified in
-{doc}`streaming-model`, with the full block-level datapath and
-control-plane walk in {doc}`hdl-datapath-corundum`. The ZU11EG is its
-lead platform: the QSFP+ cage's
-lane headroom is the only credible path to native-rate subsets beyond
-10 G.
+Coexistence of Tick, the vrt49 framer and Corundum in one design is a
+built, timing-clean bitstream in hopcap (`system_bd_fabric_hop.tcl`).
+The packetizer this page once described as future work is vrt49's
+`axi_vrt49_framer`; the block-level walk in {doc}`hdl-datapath-corundum`
+still describes the datapath. What remains for P5 and P6 on this board
+is the `libdatax` surface and the TX direction: the vrt49 deframer
+exists in HDL but hopcap does not exercise it. The hopcap
+[example page](https://tfcollins.github.io/hopcap/example.html) shows
+the dataflow and the first captures.
 
 ## MCS
 
@@ -87,4 +95,6 @@ See the canonical matrix in {doc}`api-object-model`. Summary: streaming
 at P2; `TIMED_COMMANDS`/`RX_ARM`/`TX_ARM`/`STREAM_GATE`/`TIMESTAMPS`/
 `FHM_HOP`/`MCS`/`PHASE_COHERENT` at P3; `NET_OFFLOAD_NIC` at P5 (upstream
 variant + coexistence); `NET_OFFLOAD_SAMPLES` at P6. `FASTLOCK_HOP` is
-n/a (no AD936x).
+n/a (no AD936x). Infrastructure status for each row is in
+{doc}`support-matrix`; every P3 capability's infrastructure is
+validated, so P3 is an SDK-API phase on this board.
