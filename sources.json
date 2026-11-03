@@ -13,7 +13,7 @@
     "vrt49": {
       "repository": "tfcollins/vrt49",
       "branch": "main",
-      "revision": "ee9df48d7497c2d40464cb7344e879898e199071",
+      "revision": "a7197bafc09dfccefc0b153c73fb3aac25b59fc1",
       "path": "support.json",
       "private": true,
       "why": "support-manifest PR tfcollins/vrt49#69 head"
