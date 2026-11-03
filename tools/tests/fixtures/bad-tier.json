@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "project": "tick",
+  "platforms": {
+    "ad9081-zcu102": {
+      "labgrid_place": "mini2",
+      "hdl_release": "hdl_2026_r1",
+      "features": {
+        "timed-gpio": {
+          "status": "validated",
+          "tier": 1,
+          "workflow": "hardware.yml",
+          "evidence": "https://tfcollins.github.io/tick/index.html"
+        }
+      }
+    },
+    "pluto": {
+      "features": {
+        "fastlock-hop": {
+          "status": "integration-artifacts",
+          "tier": 1,
+          "evidence": "https://tfcollins.github.io/tick/pluto-fastlock-hop.html"
+        }
+      }
+    }
+  }
+}

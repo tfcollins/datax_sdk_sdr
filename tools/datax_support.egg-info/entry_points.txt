@@ -1,0 +1,2 @@
+[console_scripts]
+datax-support = datax_support.cli:main

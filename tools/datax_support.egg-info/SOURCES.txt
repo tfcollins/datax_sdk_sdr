@@ -1,0 +1,16 @@
+LICENSE
+README.md
+pyproject.toml
+tools/datax_support/__init__.py
+tools/datax_support/check.py
+tools/datax_support/cli.py
+tools/datax_support/render.py
+tools/datax_support/vocab.py
+tools/datax_support.egg-info/PKG-INFO
+tools/datax_support.egg-info/SOURCES.txt
+tools/datax_support.egg-info/dependency_links.txt
+tools/datax_support.egg-info/entry_points.txt
+tools/datax_support.egg-info/requires.txt
+tools/datax_support.egg-info/top_level.txt
+tools/datax_support/data/schema.json
+tools/datax_support/data/vocabulary.json
