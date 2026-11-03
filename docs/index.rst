@@ -5,12 +5,15 @@ DataX SDR SDK
 
 DataX SDR SDK is a planned SDR-optimized API layered over the existing ADI
 IIO drivers and HDL reference designs. A small C core library
-(``libdatax``) with Python bindings wraps three proven building blocks —
-**libiio** for transport and control, **Tick** for FPGA-resident timed
-commands, and **Corundum** for the high-speed network plane — into one
-coherent SDR API. The radio becomes a *streaming radiohead*: a stream
-endpoint with a small set of well-defined, software-controlled functions,
-not a register playground.
+(``libdatax``) with Python bindings wraps four building blocks —
+**libiio** for transport and control, with the DAQIRI high-rate receive
+backend on its ``feature/daqiri-udp`` branch; **Tick** for FPGA-resident
+timed commands; **vrt49** for VITA 49.2 framing, IP, daemon and host
+backend over Corundum or direct Ethernet; and **hopcap**, the first
+composite application that proves the stack on the ADRV9009-ZU11EG —
+into one coherent SDR API. The radio becomes a *streaming radiohead*: a
+stream endpoint with a small set of well-defined, software-controlled
+functions, not a register playground.
 
 .. admonition:: Status
 
@@ -41,26 +44,39 @@ Supported targets
 
 .. list-table::
    :header-rows: 1
-   :widths: 28 22 50
+   :widths: 24 20 18 38
 
    * - Target
-     - Status
+     - Infrastructure
+     - SDK API
      - Notes
-   * - ADRV9009-ZU11EG on ADRV2CRR-FMC
-     - Planned — integration artifacts exist
-     - Upstream HDL ships a Corundum QSFP+ NIC variant (``CORUNDUM=1``).
-       Tick integration artifacts (TCL/XDC/dtsi, Talise FHM GPIO hop)
-       exist but are **not hardware-validated**. See
-       :doc:`platform-adrv9009-zu11eg`.
-   * - ADRV9361-Z7035
-     - Planned — new work required
-     - No Tick port and no Corundum wrapper exist today; the Tick Pluto
-       port (AD936x fastlock GPIO hopping) is the direct analogue. See
+   * - ADRV9009-ZU11EG on ADRV2CRR-FMC (``tron``)
+     - **Validated**
+     - Planned
+     - Tick scheduler and timed Talise FHM hop validated on silicon;
+       vrt49 Corundum 10G VITA 49.2 path; hopcap runs the timed hop
+       with hardware-gated capture end to end, nightly. See
+       :doc:`platform-adrv9009-zu11eg` and :doc:`support-matrix`.
+   * - ADRV9361-Z7035 on ADRV1CRR-FMC
+     - Integration artifacts
+     - Planned
+     - vrt49 1G SFP design with the vendored Tick scheduler and a
+       fastlock hop controller; control and transport qualified on
+       hardware, RF-measured hop settling unresolved. See
        :doc:`platform-adrv9361-z7035`.
+   * - AD9081-FMCA-EBZ on ZCU102 (``mini2``)
+     - Validated (Tick)
+     - Not an SDK target
+     - Tick's primary validated base (58/58 hardware suite); vrt49
+       reference design. Listed because the SDK's Tier 1 contract
+       tests inherit from it. See :doc:`support-matrix`.
 
 Status vocabulary follows the Tick project: *validated* (end-to-end on
 hardware with evidence artifacts), *integration artifacts* (HDL/DT
 collateral exists, not proven on silicon), *planned* (documented intent).
+*Infrastructure* is what the tick, vrt49, libiio and hopcap repositories
+prove on hardware; *SDK API* is ``libdatax``, which exists on no platform
+yet. The per-repository view is :doc:`support-matrix`.
 
 .. toctree::
    :maxdepth: 2
@@ -94,6 +110,7 @@ collateral exists, not proven on silicon), *planned* (documented intent).
 
    platform-adrv9361-z7035
    platform-adrv9009-zu11eg
+   support-matrix
 
 .. toctree::
    :maxdepth: 2
