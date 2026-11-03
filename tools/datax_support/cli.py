@@ -44,16 +44,19 @@ def write_fragments(fragments: dict[str, str], out_dir: Path) -> list[Path]:
 
 def _cmd_render(args: argparse.Namespace) -> int:
     if args.sources:
-        from .fetch import manifests_from_sources
+        from .fetch import load_sources, manifests_from_sources
 
         manifests = manifests_from_sources(
             Path(args.sources), token_env=args.token_env, branch_tips=args.branch_tips
         )
+        private = {s["repository"] for s in load_sources(Path(args.sources)).values() if s.get("private")}
     else:
         manifests = _parse_local(args.local or [])
+        private = set(args.private or [])
     if not manifests:
         raise SystemExit("render: no manifests given (use --sources or --local)")
-    for path in write_fragments(render_fragments(manifests, vocab.load()), Path(args.out)):
+    fragments = render_fragments(manifests, vocab.load(), private_repositories=private)
+    for path in write_fragments(fragments, Path(args.out)):
         print(path)
     return 0
 
@@ -70,6 +73,7 @@ def build_parser() -> argparse.ArgumentParser:
     r = sub.add_parser("render", help="render manifests to MyST fragments")
     r.add_argument("--sources", help="sources.json pinning repo manifests")
     r.add_argument("--local", action="append", help="<repo>=<path> (repeatable)")
+    r.add_argument("--private", action="append", help="with --local: private GitHub owner/name whose URLs get marked (repeatable)")
     r.add_argument("--out", required=True, help="output directory for fragments")
     r.add_argument("--token-env", default="SUPPORT_READ_TOKEN")
     r.add_argument("--branch-tips", action="store_true", help="fetch branch tips, not pins")

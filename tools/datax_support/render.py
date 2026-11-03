@@ -21,7 +21,17 @@ def _platform_label(slug: str, pdata: dict, voc: dict) -> str:
     return f"{name} (`{place}`)" if place else name
 
 
-def render_repo(project: str, manifest: dict, voc: dict) -> str:
+def is_private_url(url: str, private_repositories: set[str]) -> bool:
+    """True for a github.com URL inside one of the private repositories (owner/name)."""
+    return any(
+        url == f"https://github.com/{repo}" or url.startswith(f"https://github.com/{repo}/")
+        for repo in private_repositories
+    )
+
+
+def render_repo(project: str, manifest: dict, voc: dict, private_repositories: set[str] | None = None) -> str:
+    """One GFM table for a repository; evidence inside a private repository is marked (owner decision 1)."""
+    private_repositories = private_repositories or set()
     lines = [
         "| Platform | Feature | Status | Tier | Evidence |",
         "|---|---|---|---|---|",
@@ -37,7 +47,11 @@ def render_repo(project: str, manifest: dict, voc: dict) -> str:
             tier = row.get("tier")
             tier_cell = str(tier) if tier is not None else NO_ROW
             evidence = row.get("evidence")
-            ev_cell = f"[evidence]({evidence})" if evidence else NO_ROW
+            if evidence:
+                suffix = " (private repository)" if is_private_url(evidence, private_repositories) else ""
+                ev_cell = f"[evidence]({evidence}){suffix}"
+            else:
+                ev_cell = NO_ROW
             lines.append(
                 f"| {label} | {feature_cell} | {_status_text(row)} | {tier_cell} | {ev_cell} |"
             )
@@ -69,10 +83,19 @@ def render_capabilities(manifests: dict[str, dict], voc: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def render_fragments(manifests: dict[str, dict], voc: dict) -> dict[str, str]:
-    """Return {"support-<repo>.md": table, ..., "capability-infrastructure.md": table}."""
+def render_fragments(
+    manifests: dict[str, dict], voc: dict, private_repositories: set[str] | None = None
+) -> dict[str, str]:
+    """Return {"support-<repo>.md": table, ..., "capability-infrastructure.md": table}.
+
+    `private_repositories` are GitHub owner/name pairs whose URLs get the
+    "(private repository)" mark next to the evidence link.
+    """
     ordered = {k: manifests[k] for k in REPO_ORDER if k in manifests}
     ordered.update({k: v for k, v in sorted(manifests.items()) if k not in ordered})
-    out = {f"support-{repo}.md": render_repo(repo, m, voc) for repo, m in ordered.items()}
+    out = {
+        f"support-{repo}.md": render_repo(repo, m, voc, private_repositories)
+        for repo, m in ordered.items()
+    }
     out["capability-infrastructure.md"] = render_capabilities(ordered, voc)
     return out

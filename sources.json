@@ -5,7 +5,7 @@
     "tick": {
       "repository": "tfcollins/tick",
       "branch": "main",
-      "revision": "36bfac8e308554a17ab715c0d4a98a4deb22381b",
+      "revision": "4f2607c3773be61a6234fe97d3bcd3ef293d6608",
       "path": "support.json",
       "private": true,
       "why": "support-manifest PR tfcollins/tick#36 head"

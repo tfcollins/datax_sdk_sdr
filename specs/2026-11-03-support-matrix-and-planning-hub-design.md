@@ -9,11 +9,13 @@ Status: approved; sub-projects A and B implemented 2026-11-03
   `plans/2026-11-03-correct-docs-drift.md`.
 - Sub-project B: SDK `main` commits `25d77c4..` (tool, CI, sources,
   fragments, nightly); plan `plans/2026-11-03-manifest-pipeline.md`.
-  Repo PRs, each green on its own CI with the checker step:
-  tick [#36](https://github.com/tfcollins/tick/pull/36),
-  vrt49 [#69](https://github.com/tfcollins/vrt49/pull/69),
+  Repo PRs, each carrying the checker step:
+  tick [#36](https://github.com/tfcollins/tick/pull/36) (green),
+  vrt49 [#69](https://github.com/tfcollins/vrt49/pull/69) (queued on
+  the `mini2` self-hosted runner at the time of writing),
   libiio [#3](https://github.com/tfcollins/libiio/pull/3) (against
-  `feature/daqiri-udp`), hopcap [#3](https://github.com/tfcollins/hopcap/pull/3).
+  `feature/daqiri-udp`, green), hopcap [#3](https://github.com/tfcollins/hopcap/pull/3)
+  (green).
   `datax_sdk_sdr` made public 2026-11-03. Open until the owner acts:
   the `SUPPORT_READ_TOKEN` secret (the `support-render` CI job and the
   nightly need it for tick and vrt49), merging the four PRs and

@@ -91,3 +91,13 @@ def test_capability_fragment_best_status_across_repos():
     md = render_fragments(MANIFESTS, vocab.load())["capability-infrastructure.md"]
     assert "| `TIMED_COMMANDS` | integration artifacts | validated |" in md
     assert "| `MCS` | — | — |" in md
+
+
+def test_render_marks_private_repo_evidence():
+    priv = {"tfcollins/vrt49", "tfcollins/tick"}
+    out = render_fragments({"vrt49": VRT49, "tick": TICK}, vocab.load(), private_repositories=priv)
+    assert "(private repository)" in out["support-vrt49.md"]
+    # tick's evidence is on its public Pages site: no mark even though the repo is private
+    assert "(private repository)" not in out["support-tick.md"]
+    md_pub = render_fragments({"vrt49": VRT49}, vocab.load(), private_repositories=set())["support-vrt49.md"]
+    assert "(private repository)" not in md_pub
