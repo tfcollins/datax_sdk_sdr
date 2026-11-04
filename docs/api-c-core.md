@@ -9,6 +9,44 @@ Conventions: all functions return `int` (0 or negative errno) unless a
 handle or count is the documented return; all handles are opaque; `ch`
 arguments are channel indices, `mask` arguments are channel bitmasks.
 
+## Types
+
+```c
+typedef unsigned long long datax_time;       /* device ticks (see api-object-model) */
+#define DATAX_TIME_NOW ((datax_time)0)       /* immediate, software path */
+
+enum datax_direction { DATAX_RX = 0, DATAX_TX = 1 };
+
+#define DATAX_ERR_LATE (-ETIME)              /* deadline unmeetable at submit */
+
+enum datax_cap {                             /* order matches the capability matrix */
+    DATAX_CAP_TIMED_COMMANDS, DATAX_CAP_RX_ARM, DATAX_CAP_TX_ARM,
+    DATAX_CAP_STREAM_GATE, DATAX_CAP_TIMESTAMPS, DATAX_CAP_FASTLOCK_HOP,
+    DATAX_CAP_FHM_HOP, DATAX_CAP_MCS, DATAX_CAP_PHASE_COHERENT,
+    DATAX_CAP_NET_OFFLOAD_NIC, DATAX_CAP_NET_OFFLOAD_SAMPLES, DATAX_CAP_COUNT
+};
+enum datax_limit {
+    DATAX_LIMIT_TICK_HZ, DATAX_LIMIT_QUEUE_DEPTH, DATAX_LIMIT_HOP_TABLE_DEPTH,
+    DATAX_LIMIT_GUARD_MARGIN_MS, DATAX_LIMIT_MAX_CHANNELS, DATAX_LIMIT_COUNT
+};
+bool datax_caps_has(const struct datax_caps *caps, enum datax_cap cap);
+int  datax_caps_get_limit(const struct datax_caps *caps, enum datax_limit which,
+                          unsigned long long *value);
+
+struct datax_event {
+    enum datax_event_type type;
+    unsigned long long ticks;                /* device time of the event, 0 if unknown */
+    long seq;                                /* scheduler sequence id, -1 if none */
+    const char *detail;                      /* human-readable, valid during the callback */
+};
+```
+
+`datax_caps` is opaque, like every other handle; a flag reads true only
+when this library can perform the capability on this context, which is
+stricter than "the hardware is present". Implementations may expose what
+the probe detected through diagnostics (`datax doctor`), never through
+`datax_caps_has`.
+
 ## Context
 
 ```c
@@ -29,7 +67,11 @@ int  datax_context_get_version(const struct datax_context *ctx,
 `create_from_uri` accepts any libiio URI (`ip:`, `usb:`, `serial:`,
 `local:`) — the radiohead is remote or local with no other code change.
 Creation runs capability discovery ({doc}`api-object-model`) once and
-caches the result on each device.
+caches the result on each device. Only radio families become
+`datax_device` objects (AD936x; the ADRV9009 pair folded into one
+device), in IIO enumeration order; every other IIO device — monitors,
+clock chips, streaming blocks, the Tick scheduler — stays reachable
+through `datax_context_get_iio_context()`.
 
 ## Device
 
