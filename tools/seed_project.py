@@ -15,11 +15,11 @@ import sys
 
 TITLE = "DataX SDR"
 ISSUE_REPO = "datax_sdk_sdr"
-LINKED_REPOS = ["datax_sdk_sdr", "tick", "vrt49", "libiio", "hopcap"]
+LINKED_REPOS = ["datax_sdk_sdr", "tick", "vrt49", "libiio", "hopcap", "libdatax"]
 SPEC = "specs/2026-11-03-support-matrix-and-planning-hub-design.md"
 
 FIELDS = {
-    "Codebase": ["sdk", "tick", "vrt49", "libiio", "hopcap"],
+    "Codebase": ["sdk", "tick", "vrt49", "libiio", "hopcap", "libdatax"],
     "Platform": [
         "all", "ad9081-zcu102", "adrv9009-zu11eg", "adrv9009-zc706", "adrv9361-z7035",
         "adrv9002-zcu102", "fmcomms2-zcu102", "vcu118-daq3", "pluto", "host",

@@ -3,43 +3,94 @@
   "$id": "https://tfcollins.github.io/datax_sdk_sdr/support/schema.json",
   "title": "DataX SDR support manifest",
   "type": "object",
-  "required": ["schema", "project", "platforms"],
+  "required": [
+    "schema",
+    "project",
+    "platforms"
+  ],
   "additionalProperties": false,
   "properties": {
-    "schema": {"const": 1},
-    "project": {"enum": ["tick", "vrt49", "libiio", "hopcap", "sdk"]},
+    "schema": {
+      "const": 1
+    },
+    "project": {
+      "enum": [
+        "tick",
+        "vrt49",
+        "libiio",
+        "hopcap",
+        "libdatax",
+        "sdk"
+      ]
+    },
     "platforms": {
       "type": "object",
-      "additionalProperties": {"$ref": "#/$defs/platform"}
+      "additionalProperties": {
+        "$ref": "#/$defs/platform"
+      }
     }
   },
   "$defs": {
     "platform": {
       "type": "object",
-      "required": ["features"],
+      "required": [
+        "features"
+      ],
       "additionalProperties": false,
       "properties": {
-        "carrier": {"type": "string"},
-        "labgrid_place": {"type": "string"},
-        "hdl_release": {"type": "string"},
+        "carrier": {
+          "type": "string"
+        },
+        "labgrid_place": {
+          "type": "string"
+        },
+        "hdl_release": {
+          "type": "string"
+        },
         "features": {
           "type": "object",
-          "additionalProperties": {"$ref": "#/$defs/row"}
+          "additionalProperties": {
+            "$ref": "#/$defs/row"
+          }
         }
       }
     },
     "row": {
       "type": "object",
-      "required": ["status"],
+      "required": [
+        "status"
+      ],
       "additionalProperties": false,
       "properties": {
-        "status": {"enum": ["planned", "integration-artifacts", "validated"]},
-        "tier": {"type": "integer", "minimum": 1, "maximum": 3},
-        "workflow": {"type": "string"},
-        "evidence": {"type": "string", "format": "uri"},
-        "last_run": {"type": "string", "format": "uri"},
-        "note": {"type": "string"},
-        "software_only": {"type": "boolean"}
+        "status": {
+          "enum": [
+            "planned",
+            "integration-artifacts",
+            "validated"
+          ]
+        },
+        "tier": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "workflow": {
+          "type": "string"
+        },
+        "evidence": {
+          "type": "string",
+          "format": "uri"
+        },
+        "last_run": {
+          "type": "string",
+          "format": "uri"
+        },
+        "note": {
+          "type": "string"
+        },
+        "software_only": {
+          "type": "boolean"
+        }
       }
     }
   }
