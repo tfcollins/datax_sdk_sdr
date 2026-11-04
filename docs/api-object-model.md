@@ -141,7 +141,7 @@ Capabilities by platform *and phase* — the phase gates are defined in the
 | Capability | ADRV9361-Z7035 | ADRV9009-ZU11EG |
 |---|---|---|
 | Streaming (immediate) | P2 | P2 |
-| `TIMED_COMMANDS` | P4 — new Tick port | P3 — Tick HW validation |
+| `TIMED_COMMANDS` | P4 — Tick in vrt49's 1G SFP design, RF settle open | P3 — Tick validated, API exposure |
 | `RX_ARM` / `TX_ARM` | P4 | P3 |
 | `STREAM_GATE` | P4 | P3 |
 | `TIMESTAMPS` | P4 | P3 |
@@ -149,7 +149,7 @@ Capabilities by platform *and phase* — the phase gates are defined in the
 | `FHM_HOP` | — (n/a) | P3 |
 | `MCS` | — (single chip) | P3 |
 | `PHASE_COHERENT` | — | P3 (post-MCS state) |
-| `NET_OFFLOAD_NIC` | P5 — new GTX wrapper (highest-risk) | P5 — upstream `CORUNDUM=1` exists |
+| `NET_OFFLOAD_NIC` | P5 — 1G SFP shipped; 10G GTX wrapper (highest-risk) | P5 — vrt49 Corundum design validated |
 | `NET_OFFLOAD_SAMPLES` | P6 — subsets only | P6 |
 
 "P*n*" = the capability turns on in `libdatax` when that roadmap phase

@@ -105,9 +105,9 @@ The composition in one picture — three proven pieces, one new layer:
 graph TD
     APP[application — C or Python]
     APP --> LD[libdatax —<br/>one radiohead API]
-    LD --> IIO[libiio<br/>transport + control]
+    LD --> IIO[libiio<br/>transport + control,<br/>DAQIRI high-rate receive]
     LD --> TICK[Tick<br/>FPGA-resident timed commands]
-    LD --> COR[Corundum<br/>network plane]
+    LD --> VRT[vrt49<br/>VITA 49.2 over Corundum<br/>or direct Ethernet]
     IIO -.->|iio_context escape hatch,<br/>always available| APP
 ```
 
@@ -117,9 +117,9 @@ graph TD
 |---|---|---|---|
 | Timed control | Per-command time tags | Immediate writes only | Tick descriptors behind `sched.at(t)` |
 | Scheduled stream start | `stream_cmd_t` + time_spec | None | `stream.start_at(t)` via arm/release |
-| Sample timestamps | VITA-49 per packet | None | Tick stream tagger (in-band header); VITA-49 on roadmap |
+| Sample timestamps | VITA-49 per packet | None | VITA 49.2 per packet via vrt49 (ZU11EG today); Tick stream tagger on the DMA path |
 | Capability discovery | Property tree | Manual per-device knowledge | First-class capability flags |
-| Network offload | 10G/100G VITA-49 | iiod over TCP | Corundum NIC now; sample offload on roadmap |
+| Network offload | 10G/100G VITA-49 | iiod over TCP | vrt49 VITA 49.2 over 10G today (ZU11EG), 100G RoCEv2 (VCU118); libiio `daqiri:` receive |
 | Hardware | USRP only | Any ADI platform | ADI SDR platforms (2 initial targets) |
 | Language surface | C++ / Python | C / Python / others | C core + Python bindings |
 

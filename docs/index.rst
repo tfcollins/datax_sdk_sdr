@@ -34,7 +34,7 @@ The gap this fills
 * **Tick** supplies exactly that missing primitive — an FPGA-resident
   timed-command scheduler with a libiio-visible control surface.
 
-DataX SDR SDK wraps libiio + Tick + Corundum behind a single
+DataX SDR SDK wraps libiio + Tick + vrt49 behind a single
 libiio-idiomatic C API with Python bindings, so "tune at time T", "capture
 N samples starting at the next PPS", and "hop this sequence" are one-line
 calls on any supported platform.
