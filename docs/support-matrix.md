@@ -1,12 +1,12 @@
 # Support Matrix
 
-This page is *reference*. For each repository the SDK builds on, it
-lists the platforms the repository supports, which features, at which
-test tier of {doc}`requirements-test`, and where the evidence is.
-Status words are the three of {doc}`requirements-documentation`:
+This page is *reference*. One table lists, per hardware platform, every
+feature a repository claims for it, which repository backs the claim,
+at which test tier of {doc}`requirements-test`, and where the evidence
+is. Status words are the three of {doc}`requirements-documentation`:
 *validated*, *integration artifacts*, *planned*.
 
-The tables are **rendered, not written**. Each repository owns a
+The table is **rendered, not written**. Each repository owns a
 `support.json` manifest that its own CI checks fail-closed (a
 *validated* row must name a workflow that exists there and link
 durable evidence). The SDK pins the manifests in `sources.json`,
@@ -17,45 +17,29 @@ workflow last passed, and link-checks the evidence; drift opens the
 issue "support matrix: drift/red". The design is
 `specs/2026-11-03-support-matrix-and-planning-hub-design.md`.
 
-Evidence links go to public documentation sites where one exists
-(tick, hopcap) and to source files on GitHub otherwise. The vrt49
-repository is private, so its links resolve only for collaborators.
+## Projects
 
-## Tick
+- **tick** — FPGA-resident timed-command scheduler: Python wire model,
+  RTL, IIO kernel driver, UAPI. <https://tfcollins.github.io/tick/>
+- **vrt49** — VITA 49.2 stack: C library, libiio host backend,
+  `iiod-vrt49` daemon, framer/deframer HDL, kernel buffer driver,
+  reference designs. <https://github.com/tfcollins/vrt49> (private;
+  its evidence links resolve only for collaborators and are marked).
+- **libiio** — the `daqiri:` backend on the `feature/daqiri-udp` branch
+  of the libiio fork: high-rate UDP sample receive through NVIDIA
+  DAQIRI, plus the `iiod` UDP stream setup command. Its rows are
+  software-validated and say so. The platform is `host`.
+  <https://github.com/tfcollins/libiio/tree/feature/daqiri-udp>
+- **hopcap** — composite application on the ADRV9009-ZU11EG:
+  Tick-timed Talise FHM hop with hardware-gated VRT49 capture over
+  QSFP. <https://tfcollins.github.io/hopcap/>
 
-FPGA-resident timed-command scheduler: Python wire model, RTL, IIO
-kernel driver, UAPI. <https://tfcollins.github.io/tick/>
+## By platform
 
-```{include} _generated/support-tick.md
-```
+Rows are grouped by platform, then feature, then project; a feature
+that two projects back on the same board appears once per project.
 
-## vrt49
-
-VITA 49.2 stack: C library, libiio host backend, `iiod-vrt49` daemon,
-framer/deframer HDL, kernel buffer driver, reference designs.
-Repository: <https://github.com/tfcollins/vrt49> (private).
-
-```{include} _generated/support-vrt49.md
-```
-
-## libiio (daqiri branch)
-
-The `daqiri:` backend on the `feature/daqiri-udp` branch of the libiio
-fork: high-rate UDP sample receive through NVIDIA DAQIRI, plus the
-`iiod` UDP stream setup command and `iiod-emu --udp`. Its rows are
-software-validated and say so.
-Repository: <https://github.com/tfcollins/libiio/tree/feature/daqiri-udp>
-
-```{include} _generated/support-libiio.md
-```
-
-## hopcap
-
-Composite application on the ADRV9009-ZU11EG: Tick-timed Talise FHM
-hop with hardware-gated VRT49 capture over QSFP.
-<https://tfcollins.github.io/hopcap/>
-
-```{include} _generated/support-hopcap.md
+```{include} _generated/support-by-platform.md
 ```
 
 ## What "validated" means here

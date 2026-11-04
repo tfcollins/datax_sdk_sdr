@@ -69,7 +69,7 @@ MANIFESTS = {"tick": TICK, "vrt49": VRT49, "libiio": LIBIIO}
 
 def test_render_writes_one_fragment_per_repo_plus_capability():
     out = render_fragments({"tick": TICK}, vocab.load())
-    assert set(out) == {"support-tick.md", "capability-infrastructure.md"}
+    assert set(out) == {"support-tick.md", "support-by-platform.md", "capability-infrastructure.md"}
 
 
 def test_render_row_links_evidence_and_marks_software_only():
@@ -101,3 +101,24 @@ def test_render_marks_private_repo_evidence():
     assert "(private repository)" not in out["support-tick.md"]
     md_pub = render_fragments({"vrt49": VRT49}, vocab.load(), private_repositories=set())["support-vrt49.md"]
     assert "(private repository)" not in md_pub
+
+
+def test_render_by_platform_groups_projects_under_one_platform():
+    hopcap = {"schema": 1, "project": "hopcap", "platforms": {"adrv9009-zu11eg": {"labgrid_place": "tron", "features": {
+        "fhm-hop": {"status": "validated", "tier": 2, "workflow": "hw-test.yml",
+                    "evidence": "https://tfcollins.github.io/hopcap/example.html"}}}}}
+    tick_zu = {"schema": 1, "project": "tick", "platforms": {"adrv9009-zu11eg": {"labgrid_place": "tron", "features": {
+        "fhm-hop": {"status": "validated", "tier": 2, "workflow": "tron-repeat-hil.yml",
+                    "evidence": "https://tfcollins.github.io/tick/adrv9009-fhm-hop.html"},
+        "timed-gpio": {"status": "validated", "tier": 2, "workflow": "tron-repeat-hil.yml",
+                       "evidence": "https://tfcollins.github.io/tick/adrv9009-zu11eg-bringup.html"}}}}}
+    out = render_fragments({"hopcap": hopcap, "tick": tick_zu, "vrt49": VRT49}, vocab.load())
+    md = out["support-by-platform.md"]
+    lines = [l for l in md.splitlines() if l.startswith("| ")]
+    assert lines[0] == "| Platform | Feature | Project | Status | Tier | Evidence |"
+    rows = lines[1:]
+    # platforms follow vocabulary order: ZU11EG before Z7035; within a platform, feature then project
+    assert rows[0].startswith("| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | Talise FHM hop | hopcap |")
+    assert rows[1].startswith("| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | Talise FHM hop | tick |")
+    assert rows[2].startswith("| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | timed GPIO | tick |")
+    assert rows[3].startswith("| ADRV9361-Z7035 | timed GPIO | vrt49 |")

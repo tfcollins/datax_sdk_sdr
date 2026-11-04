@@ -83,6 +83,43 @@ def render_capabilities(manifests: dict[str, dict], voc: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def render_by_platform(manifests: dict[str, dict], voc: dict, private_repositories: set[str] | None = None) -> str:
+    """One table over every repository, grouped by platform (vocabulary order), then feature, then project."""
+    private_repositories = private_repositories or set()
+    rows: list[tuple[int, str, str, str]] = []  # (platform rank, feature slug, project, line)
+    platform_rank = {slug: i for i, slug in enumerate(voc["platforms"])}
+    # one label per platform: the place comes from whichever manifest names it
+    places: dict[str, str] = {}
+    for manifest in manifests.values():
+        for platform, pdata in manifest["platforms"].items():
+            if pdata.get("labgrid_place") and platform not in places:
+                places[platform] = pdata["labgrid_place"]
+    for project in sorted(manifests):
+        manifest = manifests[project]
+        for platform, pdata in manifest["platforms"].items():
+            label = _platform_label(platform, {"labgrid_place": places.get(platform)}, voc)
+            for feature, row in pdata["features"].items():
+                fname = voc["features"].get(feature, {}).get("name", feature)
+                note = row.get("note")
+                feature_cell = f"{fname} ({note})" if note else fname
+                tier = row.get("tier")
+                tier_cell = str(tier) if tier is not None else NO_ROW
+                evidence = row.get("evidence")
+                if evidence:
+                    suffix = " (private repository)" if is_private_url(evidence, private_repositories) else ""
+                    ev_cell = f"[evidence]({evidence}){suffix}"
+                else:
+                    ev_cell = NO_ROW
+                line = f"| {label} | {feature_cell} | {project} | {_status_text(row)} | {tier_cell} | {ev_cell} |"
+                rows.append((platform_rank.get(platform, len(platform_rank)), feature, project, line))
+    rows.sort(key=lambda r: (r[0], r[1], r[2]))
+    header = [
+        "| Platform | Feature | Project | Status | Tier | Evidence |",
+        "|---|---|---|---|---|---|",
+    ]
+    return "\n".join(header + [r[3] for r in rows]) + "\n"
+
+
 def render_fragments(
     manifests: dict[str, dict], voc: dict, private_repositories: set[str] | None = None
 ) -> dict[str, str]:
@@ -97,5 +134,6 @@ def render_fragments(
         f"support-{repo}.md": render_repo(repo, m, voc, private_repositories)
         for repo, m in ordered.items()
     }
+    out["support-by-platform.md"] = render_by_platform(ordered, voc, private_repositories)
     out["capability-infrastructure.md"] = render_capabilities(ordered, voc)
     return out
