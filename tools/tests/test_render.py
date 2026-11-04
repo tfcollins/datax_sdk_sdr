@@ -69,7 +69,7 @@ MANIFESTS = {"tick": TICK, "vrt49": VRT49, "libiio": LIBIIO}
 
 def test_render_writes_one_fragment_per_repo_plus_capability():
     out = render_fragments({"tick": TICK}, vocab.load())
-    assert set(out) == {"support-tick.md", "support-by-platform.md", "capability-infrastructure.md"}
+    assert set(out) == {"support-tick.md", "support-by-platform.md", "support-platforms.md", "capability-infrastructure.md"}
 
 
 def test_render_row_links_evidence_and_marks_software_only():
@@ -122,3 +122,27 @@ def test_render_by_platform_groups_projects_under_one_platform():
     assert rows[1].startswith("| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | Talise FHM hop | tick |")
     assert rows[2].startswith("| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | timed GPIO | tick |")
     assert rows[3].startswith("| ADRV9361-Z7035 | timed GPIO | vrt49 |")
+
+
+def test_render_platform_rows_one_per_platform():
+    hopcap = {"schema": 1, "project": "hopcap", "platforms": {"adrv9009-zu11eg": {"labgrid_place": "tron", "features": {
+        "fhm-hop": {"status": "validated", "tier": 2, "workflow": "hw-test.yml",
+                    "evidence": "https://tfcollins.github.io/hopcap/example.html"},
+        "timed-capture": {"status": "planned"}}}}}
+    tick_zu = {"schema": 1, "project": "tick", "platforms": {"adrv9009-zu11eg": {"labgrid_place": "tron", "features": {
+        "fhm-hop": {"status": "validated", "tier": 2, "workflow": "tron-repeat-hil.yml",
+                    "evidence": "https://tfcollins.github.io/tick/adrv9009-fhm-hop.html"}}}}}
+    out = render_fragments({"hopcap": hopcap, "tick": tick_zu, "vrt49": VRT49}, vocab.load())
+    md = out["support-platforms.md"]
+    rows = [l for l in md.splitlines() if l.startswith("| ")]
+    assert rows[0] == "| Platform | Validated | Integration artifacts | Planned |"
+    assert len(rows) == 1 + 2  # header + ZU11EG + Z7035
+    zu = rows[1]
+    assert zu.startswith("| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | ")
+    cells = [c.strip() for c in zu.strip("|").split(" | ")]
+    validated, ia, planned = cells[1], cells[2], cells[3]
+    assert "[Talise FHM hop](https://tfcollins.github.io/hopcap/example.html) (hopcap, T2)" in validated
+    assert "[Talise FHM hop](https://tfcollins.github.io/tick/adrv9009-fhm-hop.html) (tick, T2)" in validated
+    assert "<br>" in validated  # two items, one per line
+    assert ia == "—"
+    assert planned == "timed capture (hopcap)"

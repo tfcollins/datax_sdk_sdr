@@ -36,11 +36,17 @@ issue "support matrix: drift/red". The design is
 
 ## By platform
 
-Rows are grouped by platform, then feature, then project; a feature
-that two projects back on the same board appears once per project.
+One row per board. Each cell lists the features in that state as
+*feature (project, tier)*, linked to the evidence; a feature two
+projects back on the same board appears once per project. *(software)*
+marks a software-only validation; *(private)* marks evidence inside a
+private repository.
 
-```{include} _generated/support-by-platform.md
+```{include} _generated/support-platforms.md
 ```
+
+The same data as a flat list, one row per feature and project, is in
+`docs/_generated/support-by-platform.md`.
 
 ## What "validated" means here
 

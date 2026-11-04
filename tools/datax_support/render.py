@@ -120,6 +120,41 @@ def render_by_platform(manifests: dict[str, dict], voc: dict, private_repositori
     return "\n".join(header + [r[3] for r in rows]) + "\n"
 
 
+def render_platform_rows(manifests: dict[str, dict], voc: dict, private_repositories: set[str] | None = None) -> str:
+    """One row per platform; one column per status, listing "feature (project, Tn)" items linked to evidence."""
+    private_repositories = private_repositories or set()
+    statuses = ("validated", "integration-artifacts", "planned")
+    per_platform: dict[str, dict[str, list[tuple[str, str, str]]]] = {}
+    places: dict[str, str] = {}
+    for project in sorted(manifests):
+        for platform, pdata in manifests[project]["platforms"].items():
+            if pdata.get("labgrid_place") and platform not in places:
+                places[platform] = pdata["labgrid_place"]
+            buckets = per_platform.setdefault(platform, {s: [] for s in statuses})
+            for feature, row in pdata["features"].items():
+                fname = voc["features"].get(feature, {}).get("name", feature)
+                evidence = row.get("evidence")
+                if evidence:
+                    mark = " (private)" if is_private_url(evidence, private_repositories) else ""
+                    name = f"[{fname}]({evidence}){mark}"
+                else:
+                    name = fname
+                tier = row.get("tier")
+                tag = f"{project}, T{tier}" if tier is not None else project
+                extra = " (software)" if row.get("software_only") else ""
+                buckets[row["status"]].append((feature, project, f"{name} ({tag}){extra}"))
+    platform_rank = {slug: i for i, slug in enumerate(voc["platforms"])}
+    lines = ["| Platform | Validated | Integration artifacts | Planned |", "|---|---|---|---|"]
+    for platform in sorted(per_platform, key=lambda p: platform_rank.get(p, len(platform_rank))):
+        label = _platform_label(platform, {"labgrid_place": places.get(platform)}, voc)
+        cells = []
+        for status in statuses:
+            items = sorted(per_platform[platform][status])
+            cells.append("<br>".join(i[2] for i in items) if items else NO_ROW)
+        lines.append(f"| {label} | " + " | ".join(cells) + " |")
+    return "\n".join(lines) + "\n"
+
+
 def render_fragments(
     manifests: dict[str, dict], voc: dict, private_repositories: set[str] | None = None
 ) -> dict[str, str]:
@@ -135,5 +170,6 @@ def render_fragments(
         for repo, m in ordered.items()
     }
     out["support-by-platform.md"] = render_by_platform(ordered, voc, private_repositories)
+    out["support-platforms.md"] = render_platform_rows(ordered, voc, private_repositories)
     out["capability-infrastructure.md"] = render_capabilities(ordered, voc)
     return out
