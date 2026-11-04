@@ -39,6 +39,14 @@ struct datax_event {
     long seq;                                /* scheduler sequence id, -1 if none */
     const char *detail;                      /* human-readable, valid during the callback */
 };
+
+enum datax_completion_status {
+    DATAX_COMPLETION_OK, DATAX_COMPLETION_LATE,
+    DATAX_COMPLETION_DROPPED, DATAX_COMPLETION_FLUSHED
+};
+
+#define DATAX_VERSION_MAJOR 0                /* mirrored by datax_context_get_version() */
+#define DATAX_VERSION_MINOR 1
 ```
 
 `datax_caps` is opaque, like every other handle; a flag reads true only
@@ -89,8 +97,12 @@ int datax_device_set_gain(struct datax_device *dev, unsigned int ch,
 int datax_device_get_gain(const struct datax_device *dev, unsigned int ch, double *db);
 int datax_device_set_sample_rate(struct datax_device *dev,
                                  unsigned long long sps);   /* never timed */
+int datax_device_get_sample_rate(const struct datax_device *dev,
+                                 unsigned long long *sps);
 int datax_device_set_bandwidth(struct datax_device *dev, unsigned int ch,
                                unsigned long long hz);
+int datax_device_get_bandwidth(const struct datax_device *dev, unsigned int ch,
+                               unsigned long long *hz);
 
 /* Hop staging — pre-loads fastlock profiles (Z7035) or the FHM table
  * (ZU11EG). Milliseconds-scale, never timed; stage before scheduling. */
