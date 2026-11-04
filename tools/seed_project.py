@@ -27,7 +27,18 @@ FIELDS = {
     "Phase": ["P0", "P1", "P2", "P3", "P4", "P5", "P6"],
     "Priority": ["P1", "P2", "P3"],
     "Requirement": None,  # text
+    "Sprint": ["Now", "Next", "Later", "Blocked-lab"],
 }
+
+# Sprint by issue number in datax_sdk_sdr (owner decision 2026-11-04): Now = this week,
+# Next = the first SDK code (P1), Later = evidence work as lab time allows,
+# Blocked-lab = needs a physical or sudo action by the owner first.
+SPRINT_BY_NUMBER = {
+    2: "Now", 3: "Now", 4: "Now", 5: "Now",
+    6: "Next",
+    22: "Blocked-lab", 23: "Blocked-lab",
+}
+DEFAULT_SPRINT = "Later"
 
 # title, repo, platform, phase, priority, requirement, body
 BACKLOG = [
@@ -206,6 +217,13 @@ def main() -> int:
         set_single(project_id, item_id, fields["Priority"], priority)
         if requirement:
             set_text(project_id, item_id, fields["Requirement"], requirement)
+    # Sprint for every item on the board, by issue number
+    for issue_url, item_id in board_items(number, owner).items():
+        try:
+            num = int(issue_url.rstrip("/").rsplit("/", 1)[-1])
+        except ValueError:
+            continue
+        set_single(project_id, item_id, fields["Sprint"], SPRINT_BY_NUMBER.get(num, DEFAULT_SPRINT))
     print(f"items on board: {len(board_items(number, owner))}")
     return 0
 
