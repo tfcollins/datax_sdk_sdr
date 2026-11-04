@@ -1,6 +1,6 @@
 | Capability | ADRV9361-Z7035 | ADRV9009-ZU11EG / ADRV2CRR-FMC |
 |---|---|---|
-| `Streaming (immediate)` | integration artifacts | — |
+| `Streaming (immediate)` | integration artifacts | planned |
 | `TIMED_COMMANDS` | integration artifacts | validated |
 | `RX_ARM` | — | planned |
 | `TX_ARM` | — | — |

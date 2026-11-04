@@ -33,6 +33,14 @@
       "path": "support.json",
       "private": false,
       "why": "main after support-manifest PR #3 merged"
+    },
+    "libdatax": {
+      "repository": "tfcollins/libdatax",
+      "branch": "main",
+      "revision": "66c9531f2df0da4761f130b32e03c12822708d91",
+      "path": "support.json",
+      "private": false,
+      "why": "P1 skeleton merged (tasks 1-9) 2026-11-04"
     }
   }
 }

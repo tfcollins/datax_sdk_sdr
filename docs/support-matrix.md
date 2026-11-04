@@ -30,6 +30,10 @@ issue "support matrix: drift/red". The design is
   DAQIRI, plus the `iiod` UDP stream setup command. Its rows are
   software-validated and say so. The platform is `host`.
   <https://github.com/tfcollins/libiio/tree/feature/daqiri-udp>
+- **libdatax** — the SDK core itself: C11 `libdatax` over libiio v1 with
+  the ctypes `datax` package; P1 (context, device, capabilities, Tick
+  time) is software-validated against the libiio emulator.
+  <https://github.com/tfcollins/libdatax>
 - **hopcap** — composite application on the ADRV9009-ZU11EG:
   Tick-timed Talise FHM hop with hardware-gated VRT49 capture over
   QSFP. <https://tfcollins.github.io/hopcap/>
