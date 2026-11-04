@@ -5,34 +5,34 @@
     "tick": {
       "repository": "tfcollins/tick",
       "branch": "main",
-      "revision": "4f2607c3773be61a6234fe97d3bcd3ef293d6608",
+      "revision": "aeb175faeb01385aba147bda59e450c97723eb34",
       "path": "support.json",
       "private": true,
-      "why": "support-manifest PR tfcollins/tick#36 head"
+      "why": "main after support-manifest PR #36 merged"
     },
     "vrt49": {
       "repository": "tfcollins/vrt49",
       "branch": "main",
-      "revision": "a7197bafc09dfccefc0b153c73fb3aac25b59fc1",
+      "revision": "7df92cc234545d30dff9c6e1ecc3f2632b52324b",
       "path": "support.json",
       "private": true,
-      "why": "support-manifest PR tfcollins/vrt49#69 head"
+      "why": "main after support-manifest PR #69 merged"
     },
     "libiio": {
       "repository": "tfcollins/libiio",
       "branch": "feature/daqiri-udp",
-      "revision": "fed803b964d5b1954d76801bf6042352043dcbd8",
+      "revision": "6534f14215f4738cec224bf50f13f475fe5264a6",
       "path": "CI/daqiri/support.json",
       "private": false,
-      "why": "daqiri-support-manifest PR tfcollins/libiio#3 head"
+      "why": "feature/daqiri-udp after PR #3 merged"
     },
     "hopcap": {
       "repository": "tfcollins/hopcap",
       "branch": "main",
-      "revision": "dd963797b10fadf751261ae0d230b1aa7d4ddb17",
+      "revision": "f6bdc22b2c2103e582dca5c39e55b98300660362",
       "path": "support.json",
       "private": false,
-      "why": "support-manifest PR tfcollins/hopcap#3 head"
+      "why": "main after support-manifest PR #3 merged"
     }
   }
 }
