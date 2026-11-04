@@ -11,8 +11,8 @@ Status: approved; sub-projects A and B implemented 2026-11-03
   fragments, nightly); plan `plans/2026-11-03-manifest-pipeline.md`.
   Repo PRs, each carrying the checker step:
   tick [#36](https://github.com/tfcollins/tick/pull/36) (green),
-  vrt49 [#69](https://github.com/tfcollins/vrt49/pull/69) (queued on
-  the `mini2` self-hosted runner at the time of writing),
+  vrt49 [#69](https://github.com/tfcollins/vrt49/pull/69) (green after
+  adding `ca-certificates` to the containerised job),
   libiio [#3](https://github.com/tfcollins/libiio/pull/3) (against
   `feature/daqiri-udp`, green), hopcap [#3](https://github.com/tfcollins/hopcap/pull/3)
   (green).
