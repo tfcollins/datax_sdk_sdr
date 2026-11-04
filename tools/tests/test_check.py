@@ -38,3 +38,8 @@ def test_check_software_only_allows_tier_1(fix, tmp_repo):
     assert check_manifest(fix / "software-only.support.json", tmp_repo) == []
     errs = check_manifest(fix / "bad-software-tier.json", tmp_repo)
     assert any("tier >= 2" in e for e in errs)
+
+
+def test_check_rejects_tier_on_planned_row(fix, tmp_repo):
+    errs = check_manifest(fix / "bad-planned-tier.json", tmp_repo)
+    assert any("planned" in e and "tier" in e for e in errs)

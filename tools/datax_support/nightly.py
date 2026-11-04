@@ -75,13 +75,14 @@ def _api_get(path: str, token: str | None) -> dict:
         return json.load(resp)
 
 
-def workflow_runs(source: dict, workflow: str, token: str | None) -> list[dict]:
+def workflow_runs(source: dict, workflow: str, token: str | None) -> list[dict] | None:
+    """Runs of `workflow` on the source's branch; None when the workflow file does not exist (404)."""
     path = f"/repos/{source['repository']}/actions/workflows/{workflow}/runs?branch={source['branch']}&per_page=30"
     try:
         return _api_get(path, token).get("workflow_runs", [])
     except HTTPError as exc:
         if exc.code == 404:
-            return []
+            return None
         raise
 
 
@@ -137,11 +138,14 @@ def nightly(sources_path: Path, generated_dir: Path, token: str | None, now: dat
                 if row["status"] == "validated" and wf and (repo, wf) not in checked_workflows:
                     checked_workflows.add((repo, wf))
                     runs = workflow_runs(src, wf, api_token)
+                    wf_url = f"https://github.com/{src['repository']}/actions/workflows/{wf}"
+                    if runs is None:
+                        report.red.append((repo, wf, "missing-workflow", wf_url))
+                        continue
                     state = classify_runs(runs, now)
                     if state != "green":
                         latest = latest_decisive(runs)
-                        url = latest["html_url"] if latest else f"https://github.com/{src['repository']}/actions/workflows/{wf}"
-                        report.red.append((repo, wf, state, url))
+                        report.red.append((repo, wf, state, latest["html_url"] if latest else wf_url))
                 ev = row.get("evidence")
                 if ev and ev not in checked_links and not is_private_url(ev, private_repositories):
                     checked_links.add(ev)

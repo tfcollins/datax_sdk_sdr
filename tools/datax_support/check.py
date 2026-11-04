@@ -73,4 +73,7 @@ def _check_row(loc: str, row: dict, workflows_dir: Path) -> list[str]:
     elif status == "integration-artifacts":
         if not evidence:
             errs.append(f"{loc}: integration-artifacts requires an evidence URL")
+    elif status == "planned":
+        if "tier" in row:
+            errs.append(f"{loc}: a planned row must not carry a tier (nothing has run)")
     return errs

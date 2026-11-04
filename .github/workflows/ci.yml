@@ -37,6 +37,8 @@ jobs:
 
   support-render:
     name: generated support fragments are current
+    # Fork PRs cannot read SUPPORT_READ_TOKEN; run only for same-repo events.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -58,8 +60,11 @@ jobs:
           SUPPORT_READ_TOKEN: ${{ secrets.SUPPORT_READ_TOKEN }}
 
       - name: Committed fragments match
+        # git status also catches a new, untracked fragment (a fifth repo in sources.json).
         run: |
-          if ! git diff --exit-code -- docs/_generated; then
+          if [ -n "$(git status --porcelain -- docs/_generated)" ]; then
+            git status --porcelain -- docs/_generated
+            git diff -- docs/_generated
             echo "::error::generated fragments are stale: run 'datax-support render --sources sources.json --out docs/_generated' and commit" >&2
             exit 1
           fi

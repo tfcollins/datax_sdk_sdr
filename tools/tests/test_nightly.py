@@ -36,7 +36,6 @@ def test_report_markdown_lists_sections():
     assert "## Drift" in md
     assert "## Red or stale workflows" in md
     assert "## Dead evidence links" in md
-    assert not Report(drift={}, red=[], dead_links=[]).is_clean is False
     assert Report(drift={}, red=[], dead_links=[]).is_clean
 
 
@@ -103,3 +102,11 @@ def test_workflow_runs_public_source_sends_no_token(tmp_path, monkeypatch):
     monkeypatch.setattr(mod, "link_alive", lambda url: None)
     mod.nightly(_sources(tmp_path, hopcap=PUB), tmp_path, token="t", now=NOW)
     assert seen == [None]
+
+
+def test_missing_workflow_is_reported_distinctly(tmp_path, monkeypatch):
+    monkeypatch.setattr(mod, "fetch_manifest", lambda src, token, branch_tips=False: TICK)
+    monkeypatch.setattr(mod, "workflow_runs", lambda src, wf, token: None)  # None = workflow not found (404)
+    monkeypatch.setattr(mod, "link_alive", lambda url: None)
+    report = mod.nightly(_sources(tmp_path, tick=PRIV), tmp_path, token="t", now=NOW)
+    assert [(r[1], r[2]) for r in report.red] == [("hardware.yml", "missing-workflow")]

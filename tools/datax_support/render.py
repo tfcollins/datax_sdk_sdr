@@ -8,6 +8,11 @@ REPO_ORDER = ("tick", "vrt49", "libiio", "hopcap", "sdk")
 NO_ROW = "—"
 
 
+def _esc(text: str) -> str:
+    """Escape a table-cell pipe so a note cannot break the row."""
+    return text.replace("|", "\\|")
+
+
 def _status_text(row: dict) -> str:
     text = STATUS_TEXT[row["status"]]
     if row.get("software_only"):
@@ -29,7 +34,7 @@ def is_private_url(url: str, private_repositories: set[str]) -> bool:
     )
 
 
-def render_repo(project: str, manifest: dict, voc: dict, private_repositories: set[str] | None = None) -> str:
+def render_repo(manifest: dict, voc: dict, private_repositories: set[str] | None = None) -> str:
     """One GFM table for a repository; evidence inside a private repository is marked (owner decision 1)."""
     private_repositories = private_repositories or set()
     lines = [
@@ -43,7 +48,7 @@ def render_repo(project: str, manifest: dict, voc: dict, private_repositories: s
             row = pdata["features"][feature]
             fname = voc["features"].get(feature, {}).get("name", feature)
             note = row.get("note")
-            feature_cell = f"{fname} ({note})" if note else fname
+            feature_cell = f"{fname} ({_esc(note)})" if note else fname
             tier = row.get("tier")
             tier_cell = str(tier) if tier is not None else NO_ROW
             evidence = row.get("evidence")
@@ -101,7 +106,7 @@ def render_by_platform(manifests: dict[str, dict], voc: dict, private_repositori
             for feature, row in pdata["features"].items():
                 fname = voc["features"].get(feature, {}).get("name", feature)
                 note = row.get("note")
-                feature_cell = f"{fname} ({note})" if note else fname
+                feature_cell = f"{fname} ({_esc(note)})" if note else fname
                 tier = row.get("tier")
                 tier_cell = str(tier) if tier is not None else NO_ROW
                 evidence = row.get("evidence")
@@ -166,7 +171,7 @@ def render_fragments(
     ordered = {k: manifests[k] for k in REPO_ORDER if k in manifests}
     ordered.update({k: v for k, v in sorted(manifests.items()) if k not in ordered})
     out = {
-        f"support-{repo}.md": render_repo(repo, m, voc, private_repositories)
+        f"support-{repo}.md": render_repo(m, voc, private_repositories)
         for repo, m in ordered.items()
     }
     out["support-by-platform.md"] = render_by_platform(ordered, voc, private_repositories)

@@ -146,3 +146,11 @@ def test_render_platform_rows_one_per_platform():
     assert "<br>" in validated  # two items, one per line
     assert ia == "—"
     assert planned == "timed capture (hopcap)"
+
+
+def test_render_escapes_pipe_in_note():
+    m = {"schema": 1, "project": "tick", "platforms": {"pluto": {"features": {"fastlock-hop": {
+        "status": "planned", "note": "a|b"}}}}}
+    md = render_fragments({"tick": m}, vocab.load())["support-tick.md"]
+    row = [l for l in md.splitlines() if "fastlock" in l][0]
+    assert "a\\|b" in row and row.count("|") == 7  # 6 column separators + the escaped one
