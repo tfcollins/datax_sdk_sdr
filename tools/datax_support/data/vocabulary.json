@@ -96,6 +96,9 @@
     },
     "iiod-udp-stream": {
       "name": "iiod UDP stream setup"
+    },
+    "sdk-context": {
+      "name": "SDK context and device objects"
     }
   },
   "capability_platforms": [
