@@ -181,8 +181,10 @@ struct datax_block_info {
   touched.
 - **`send`**, one-shot: fills blocks and enqueues each full one; a final
   partial block waits for the next `send`, or is padded with zeros by
-  `stop()`. Cyclic: exactly one `send` of at most `block_samples`, which
-  repeats until `stop()`; a second `send` returns `-EBUSY`.
+  `stop()`. Cyclic: exactly one `send` of at most `block_samples`; exactly
+  those `samples` instants repeat until `stop()`; a second `send` returns
+  `-EBUSY`. A cyclic stream starts transmitting at that `send`, not at
+  `start()`, so enable errors surface there.
 - **`get_block`/`put_block`**: RX lends the next filled block, TX lends a
   free one. Mixing copying and zero-copy calls on one stream returns
   `-EINVAL`.
@@ -190,8 +192,10 @@ struct datax_block_info {
   Over a v0 `iiod` network link the bound is approximate, because libiio's
   legacy buffer path blocks for the context timeout.
 - **Start and stop.** Starting a started stream returns `-EALREADY`;
-  stopping a stopped stream returns 0. A later `start()` begins a fresh
-  capture.
+  stopping a stopped stream returns 0. A later `start()` begins afresh.
+  One-shot TX `stop()` drains: it returns 0 once every sample passed to
+  `send` has reached the DMA, or `-ETIMEDOUT` (after disabling anyway) if
+  a block did not drain within the context timeout.
 - **Overflow.** When the converter core reports a DMA overflow, the next RX
   block is marked `discontinuous`. Over GigE this is the normal case at
   native rates. Where the core's status cannot be read, `discontinuous` is
