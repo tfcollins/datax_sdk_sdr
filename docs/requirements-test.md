@@ -47,7 +47,10 @@ graph LR
 
 - **REQ-TEST-030** — Loopback EVM / flatness per channel at
   representative rates — the streaming path moves *correct* samples,
-  not just samples.
+  not just samples. Two parts: a **digital** loopback inside the
+  transceiver (AD9361 `loopback`, ADRV9009 framer loopback), which proves
+  the data path bit for bit and gates P2; and an **RF** loopback through
+  cables for flatness and EVM, which needs cabling neither board has yet.
 - **REQ-TEST-031** — Hop-settling measurement: time from trigger edge
   to within-spec LO settle, per mechanism (fastlock on Z7035, FHM on
   ZU11EG), against the numbers claimed in

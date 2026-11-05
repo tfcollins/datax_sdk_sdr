@@ -39,10 +39,13 @@ amended first (REQ-DOC-001).
 ## P2 — Streaming MVP
 
 Stream objects over AXI-DMAC on both boards, stock reference designs.
-Immediate start/stop, RX/TX, cyclic TX, zero-copy paths. vrt49's
-`vrt49://` libiio backend is a candidate transport alongside AXI-DMAC.
-**Exit**: REQ-TEST-021 smoke green on both labgrid places; REQ-TEST-030
-loopback on both.
+Immediate start/stop, RX/TX, cyclic TX, zero-copy paths. The transport is
+libiio v1 blocks over the stock DMA devices, reached from the host
+through the boards' stock `iiod`; vrt49's `vrt49://` backend needs
+libiio v0 and its network-sample surface is P6 (design:
+`specs/2026-11-05-libdatax-p2-streaming-design.md`). **Exit**:
+REQ-TEST-021 smoke green on both labgrid places; REQ-TEST-030's digital
+loopback part on both.
 
 ## P3 — Timed control, ADRV9009-ZU11EG
 

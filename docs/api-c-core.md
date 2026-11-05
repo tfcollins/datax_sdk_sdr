@@ -163,6 +163,42 @@ struct datax_block_info {
 };
 ```
 
+### Immediate streaming semantics
+
+- **Sample layout.** Samples are int16 I/Q in host byte order, in the DMA
+  frame order: for each sample instant, the enabled radio channels in
+  ascending index, each as I then Q. A "sample" in every count is one such
+  instant across all enabled channels. There is no scaling or format
+  conversion, so the copying and zero-copy paths share one layout. AD9361
+  samples are 12 bits sign-extended in 16.
+- **One stream per direction per device.** A second `create` in the same
+  direction returns `-EBUSY`. `cyclic` is TX only and forces
+  `block_count` to 1.
+- **`recv`** copies up to `samples` instants and returns the number copied
+  (> 0), or `-ETIMEDOUT` if nothing arrived within `timeout_ms`. Any
+  `samples` value works with any block size: the stream keeps a cursor
+  into the current block. `info` describes the first block the call
+  touched.
+- **`send`**, one-shot: fills blocks and enqueues each full one; a final
+  partial block waits for the next `send`, or is padded with zeros by
+  `stop()`. Cyclic: exactly one `send` of at most `block_samples`, which
+  repeats until `stop()`; a second `send` returns `-EBUSY`.
+- **`get_block`/`put_block`**: RX lends the next filled block, TX lends a
+  free one. Mixing copying and zero-copy calls on one stream returns
+  `-EINVAL`.
+- **`timeout_ms`**: < 0 waits forever, 0 polls, > 0 waits up to that long.
+  Over a v0 `iiod` network link the bound is approximate, because libiio's
+  legacy buffer path blocks for the context timeout.
+- **Start and stop.** Starting a started stream returns `-EALREADY`;
+  stopping a stopped stream returns 0. A later `start()` begins a fresh
+  capture.
+- **Overflow.** When the converter core reports a DMA overflow, the next RX
+  block is marked `discontinuous`. Over GigE this is the normal case at
+  native rates. Where the core's status cannot be read, `discontinuous` is
+  always false and `datax doctor` says detection is unavailable.
+- `timestamp_ticks` is 0 until the tagger arrives with the timed path (P3).
+  Until then `start_at()` returns `-ENOTSUP`.
+
 ### Arm semantics (the timed-start contract)
 
 `start_at(T)` is implemented as *arm early, release exactly* — the
