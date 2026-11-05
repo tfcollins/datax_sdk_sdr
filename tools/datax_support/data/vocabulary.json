@@ -85,6 +85,12 @@
     "vrt-dma": {
       "name": "VITA 49.2 framing to host DMA"
     },
+    "vrt-tx-dma": {
+      "name": "VITA 49.2 transmit, host DMA into the FPGA deframer"
+    },
+    "vrt-tx-offload": {
+      "name": "VITA 49.2 transmit, network into the FPGA deframer (no PS DDR)"
+    },
     "corundum-nic": {
       "name": "Corundum NIC"
     },
