@@ -189,13 +189,22 @@ struct datax_block_info {
   free one. Mixing copying and zero-copy calls on one stream returns
   `-EINVAL`.
 - **`timeout_ms`**: < 0 waits forever, 0 polls, > 0 waits up to that long.
-  Over a v0 `iiod` network link the bound is approximate, because libiio's
-  legacy buffer path blocks for the context timeout.
+  The bound is approximate: a single libiio block operation waits up to
+  the libiio context timeout in force when the stream was created, on
+  both the binary and the legacy `iiod` protocol. Polling with 0 is
+  unreliable over a binary-protocol `iiod` until a libiio fix lands
+  (datax_sdk_sdr#26).
 - **Start and stop.** Starting a started stream returns `-EALREADY`;
   stopping a stopped stream returns 0. A later `start()` begins afresh.
   One-shot TX `stop()` drains: it returns 0 once every sample passed to
   `send` has reached the DMA, or `-ETIMEDOUT` (after disabling anyway) if
-  a block did not drain within the context timeout.
+  a block did not drain within the context timeout. RX `stop()` also
+  drains its queued blocks, stopping at the first failure. A stalled
+  stream therefore makes `stop()`, `destroy()` and
+  `datax_context_destroy()` wait up to one context timeout; with an
+  infinite context timeout they can block.
+- **Lifetime.** `datax_context_destroy()` destroys the context's streams;
+  stream handles are invalid afterwards.
 - **Overflow.** When the converter core reports a DMA overflow, the next RX
   block is marked `discontinuous`. Over GigE this is the normal case at
   native rates. Where the core's status cannot be read, `discontinuous` is
