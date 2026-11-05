@@ -29,10 +29,10 @@
     "hopcap": {
       "repository": "tfcollins/hopcap",
       "branch": "main",
-      "revision": "f6bdc22b2c2103e582dca5c39e55b98300660362",
+      "revision": "a155405b4946a62ddd60b1adaff94fcc8f0d4072",
       "path": "support.json",
       "private": false,
-      "why": "main after support-manifest PR #3 merged"
+      "why": "main after #7 (physical port parameter; SFP+ default) merged"
     },
     "libdatax": {
       "repository": "tfcollins/libdatax",

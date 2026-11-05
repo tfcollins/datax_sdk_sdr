@@ -11,9 +11,9 @@
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | immediate RX streaming (P2) | libdatax | planned | — | — |
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | timed capture (Talise settle time is a configured knob, not a measurement) | hopcap | planned | — | — |
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | timed GPIO | tick | validated | 2 | [evidence](https://tfcollins.github.io/tick/adrv9009-zu11eg-bringup.html) |
-| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | timestamps (sample-exact VRT timestamps on the QSFP path) | hopcap | validated | 2 | [evidence](https://tfcollins.github.io/hopcap/reports/2026-10-25-tron-vrt-timestamps.html) |
+| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | timestamps (sample-exact VRT timestamps; QSFP lane 0 (2026-10-25), SFP+ default since 2026-11-05) | hopcap | validated | 2 | [evidence](https://tfcollins.github.io/hopcap/reports/2026-10-25-tron-vrt-timestamps.html) |
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | timestamps | vrt49 | validated | 2 | [evidence](https://github.com/tfcollins/vrt49/blob/main/doc/source/tutorials/hw-results-zu11eg.md) (private repository) |
-| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | VITA 49.2 over UDP, 10G (QSFP lane 0 to the host spooler) | hopcap | validated | 2 | [evidence](https://tfcollins.github.io/hopcap/reports/2026-10-23-tron-first-run.html) |
+| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | VITA 49.2 over UDP, 10G (SFP+ to nemo 82599 by default (hw-test 42072932538, 2026-11-05); QSFP lane 0 selectable) | hopcap | validated | 2 | [evidence](https://tfcollins.github.io/hopcap/reports/2026-10-23-tron-first-run.html) |
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | VITA 49.2 over UDP, 10G | vrt49 | validated | 2 | [evidence](https://github.com/tfcollins/vrt49/blob/main/doc/source/tutorials/hw-results-zu11eg.md) (private repository) |
 | ADRV9009 / ZC706 | Talise FHM hop | tick | planned | — | — |
 | ADRV9009 / ZC706 | timed GPIO (scheduler validated by hand on the ZC706 (README); no CI workflow targets this board yet) | tick | integration artifacts | 2 | [evidence](https://tfcollins.github.io/tick/adrv9009-zc706-hop.html) |
