@@ -13,10 +13,10 @@
     "vrt49": {
       "repository": "tfcollins/vrt49",
       "branch": "main",
-      "revision": "7df92cc234545d30dff9c6e1ecc3f2632b52324b",
+      "revision": "0edc3be397b3191d11c7d776c8852f489b504d2f",
       "path": "support.json",
       "private": true,
-      "why": "main after support-manifest PR #69 merged"
+      "why": "main after #73 (ZU11EG TX rows: vrt-tx-dma validated, vrt-tx-offload planned) merged"
     },
     "libiio": {
       "repository": "tfcollins/libiio",

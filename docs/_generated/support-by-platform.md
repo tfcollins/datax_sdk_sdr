@@ -13,6 +13,8 @@
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | timed GPIO | tick | validated | 2 | [evidence](https://tfcollins.github.io/tick/adrv9009-zu11eg-bringup.html) |
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | timestamps (sample-exact VRT timestamps; QSFP lane 0 (2026-10-25), SFP+ default since 2026-11-05) | hopcap | validated | 2 | [evidence](https://tfcollins.github.io/hopcap/reports/2026-10-25-tron-vrt-timestamps.html) |
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | timestamps | vrt49 | validated | 2 | [evidence](https://github.com/tfcollins/vrt49/blob/main/doc/source/tutorials/hw-results-zu11eg.md) (private repository) |
+| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | VITA 49.2 transmit, host DMA into the FPGA deframer (host -> iiod-vrt49 -> DMA -> wide deframer -> DAC, all four channels back through the ADRV9009 framer loopback (test_hw_tx, run 41682753202)) | vrt49 | validated | 2 | [evidence](https://github.com/tfcollins/vrt49/blob/main/doc/source/tutorials/hw-results-zu11eg.md) (private repository) |
+| ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | VITA 49.2 transmit, network into the FPGA deframer (no PS DDR) (network -> Corundum -> deframer in fabric; no HDL yet (datax_sdk_sdr#17)) | vrt49 | planned | — | — |
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | VITA 49.2 over UDP, 10G (SFP+ to nemo 82599 by default (hw-test 42072932538, 2026-11-05); QSFP lane 0 selectable) | hopcap | validated | 2 | [evidence](https://tfcollins.github.io/hopcap/reports/2026-10-23-tron-first-run.html) |
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | VITA 49.2 over UDP, 10G | vrt49 | validated | 2 | [evidence](https://github.com/tfcollins/vrt49/blob/main/doc/source/tutorials/hw-results-zu11eg.md) (private repository) |
 | ADRV9009 / ZC706 | Talise FHM hop | tick | planned | — | — |
