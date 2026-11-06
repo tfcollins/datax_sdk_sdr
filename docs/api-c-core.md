@@ -27,7 +27,17 @@ enum datax_cap {                             /* order matches the capability mat
 };
 enum datax_limit {
     DATAX_LIMIT_TICK_HZ, DATAX_LIMIT_QUEUE_DEPTH, DATAX_LIMIT_HOP_TABLE_DEPTH,
-    DATAX_LIMIT_GUARD_MARGIN_MS, DATAX_LIMIT_MAX_CHANNELS, DATAX_LIMIT_COUNT
+    DATAX_LIMIT_GUARD_MARGIN_MS, DATAX_LIMIT_MAX_CHANNELS,
+    DATAX_LIMIT_REPORT_SPACING_US,          /* min spacing of reported commands (measured) */
+    DATAX_LIMIT_HOP_STAGE_US,               /* measured FHM/fastlock staging round trip */
+    DATAX_LIMIT_COUNT
+};
+
+enum datax_time_source {
+    DATAX_TIME_FREE_RUN,      /* internal clock, never aligned */
+    DATAX_TIME_PPS_ALIGNED,   /* epoch loaded on a fabric PPS edge */
+    DATAX_TIME_SOFT_ALIGNED,  /* aligned to the host clock in software (no PPS) */
+    DATAX_TIME_PPS_HOLDOVER   /* was PPS-aligned; PPS lost; running on the internal clock */
 };
 bool datax_caps_has(const struct datax_caps *caps, enum datax_cap cap);
 int  datax_caps_get_limit(const struct datax_caps *caps, enum datax_limit which,
@@ -114,6 +124,8 @@ int datax_device_get_time(const struct datax_device *dev,
                           unsigned long long *ticks, unsigned long long *tick_hz);
 int datax_device_set_time_next_pps(struct datax_device *dev,
                                    unsigned long long epoch_ticks);
+int datax_device_get_time_source(const struct datax_device *dev,
+                                 enum datax_time_source *src);
 
 /* Multi-chip sync (DATAX_CAP_MCS) */
 int datax_device_run_mcs(struct datax_device *dev);
@@ -121,7 +133,43 @@ int datax_device_run_mcs(struct datax_device *dev);
 
 A timed `set_frequency` requires a staged hop table containing the target
 frequency; otherwise it returns `-EINVAL` with extended error "frequency
-not staged". This keeps the pre-staged contract explicit rather than
+not staged".
+
+**Device time and PPS.** Device time is the scheduler's free-running
+counter on the fabric's internal clock. It runs, and every timed call
+works, without any PPS. `set_time_next_pps(epoch)` aligns on the next PPS
+edge when the hardware sees one within 2 s, and the source becomes
+`PPS_ALIGNED`. Otherwise it **falls back** instead of failing:
+- libdatax aligns to the host clock in software, accurate to about one
+  network round trip, and the source becomes `SOFT_ALIGNED`;
+- the call still returns 0;
+- `DATAX_EVT_PPS_LOCK_CHANGE` fires, naming the fallback.
+
+The software offset is applied wherever device time crosses the API.
+Losing PPS after alignment gives `PPS_HOLDOVER`. A PPS that appears later
+never makes time jump; its event only says that a hard alignment is now
+possible. "PPS" means whatever drives the scheduler's PPS input. On the
+ZU11EG hopcap image, that is an external PPS when one is connected, and
+otherwise Corundum's free-running PTP second. Either way it is not GNSS
+time unless an external GNSS PPS is wired.
+
+**Hop staging.** `stage_hop_table` records the set of frequencies a timed
+tune may use (up to `DATAX_LIMIT_HOP_TABLE_DEPTH`). On the ZU11EG it
+enables Talise FHM. The engine is one stage deep, so the scheduler emits a
+priming edge, which lands on the chip's FHM initial frequency, and keeps
+one frequency staged ahead. Every tune is checked by PLL readback. Hops
+need about `DATAX_LIMIT_HOP_STAGE_US` between them. Timed tunes are
+supported on the channels whose chip has its hop trigger wired to the
+scheduler; elsewhere they return `-ENOTSUP` naming the chip.
+
+**MCS.** `run_mcs()` verifies that the JESD204 multi-chip sync sequence
+has completed on every chip. It returns 0 when it has, and `-EIO` naming
+the chip and the FSM state when it has not. It does not resynchronise
+running links. `DATAX_CAP_MCS` means the board supports MCS.
+`DATAX_CAP_PHASE_COHERENT` is a live state. It is true only while MCS has
+completed, the transceivers' RF PLL phase sync is enabled, and no
+single-chip tune has happened since. Without RF PLL phase sync it stays
+false, because JESD sync alone does not fix the LO phase between chips. This keeps the pre-staged contract explicit rather than
 letting the SDK silently reload profile tables mid-schedule
 ({doc}`timing-synchronization`).
 
@@ -260,6 +308,9 @@ long datax_sched_queue_tune(struct datax_sched *sched, datax_time when,
 long datax_sched_queue_stream_gate(struct datax_sched *sched, datax_time when,
                                    struct datax_stream *stream, bool enable);
 
+/* Mark an already-queued command (by its seq) to report completion. */
+int datax_sched_report(struct datax_sched *sched, long seq);
+
 int datax_sched_commit(struct datax_sched *sched);
 int datax_sched_flush(struct datax_sched *sched);
 
@@ -276,6 +327,40 @@ struct datax_completion {
     unsigned long long executed_ticks;
 };
 ```
+
+### Scheduler semantics
+
+- **One scheduler per device.** A second `datax_sched_create` returns
+  `-EBUSY`. A timed device call (`set_frequency` with a `when`) uses the
+  device's scheduler and creates it if needed. The scheduler hardware is
+  exclusive, so other users of the board's scheduler (applications,
+  `iio_attr`) must not run at the same time.
+- **Commits stream.** `commit()` accepts any number of queued commands.
+  The poller then keeps the hardware queue topped up in timestamp order,
+  leaving one entry spare. A command that the host could not write before
+  its timestamp minus the guard margin completes `DATAX_COMPLETION_LATE`
+  (detail "host could not keep the queue fed") and is never written. A
+  command already inside the guard margin when `commit()` is called makes
+  `commit()` return `DATAX_ERR_LATE`, and nothing in that batch is written.
+- **Late never executes silently.** Commands are queued with drop-on-late.
+  A command the hardware finds late completes `LATE` (when reported) and
+  is counted, and the count raises `DATAX_EVT_LATE_COMMAND`.
+- **Reporting is sparse and spaced.** Only commands marked with
+  `datax_sched_report()` produce a completion; `queue_tune` marks its hop
+  edge itself. The scheduler hardware holds a reported command while its
+  single completion slot is unacknowledged, then records it as on time
+  (tfcollins/tick#38). So `commit()` refuses, with `-EINVAL`, reported
+  commands closer together than `DATAX_LIMIT_REPORT_SPACING_US`, a value
+  measured when the scheduler is created. A completion drained later than
+  the next reported command's time marks that command `LATE`, with detail
+  "poller lagged". `wait(seq)` on a command that was not reported returns
+  `-EINVAL`. A reported command whose completion never arrives completes
+  `DROPPED`, with detail naming the scheduler's overflow count.
+- **Reserved lines.** On platforms where a scheduler GPIO line triggers
+  hops, `queue_gpio` refuses a mask that touches that line (`-EINVAL`);
+  only `queue_tune` drives it.
+- `queue_stream_gate` and `stream_start_at` return `-ENOTSUP` until a
+  platform's timed-stream hardware exists (ZU11EG: P3b).
 
 ### Abstracting the Tick submission bottleneck
 
