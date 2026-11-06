@@ -148,7 +148,12 @@ edge when the hardware sees one within 2 s, and the source becomes
 The software offset is applied wherever device time crosses the API.
 Losing PPS after alignment gives `PPS_HOLDOVER` where the hardware reports a live PPS (the current Tick latches "PPS seen" until reset, so it cannot, tfcollins/tick#39). A PPS that appears later
 never makes time jump; its event only says that a hard alignment is now
-possible. "PPS" means whatever drives the scheduler's PPS input. On the
+possible. One exception comes from the hardware. If a hard alignment timed out while the
+scheduler still reported a PPS, the scheduler stays armed. A late edge then makes device time
+jump to the epoch. libdatax adopts it: the source becomes `PPS_ALIGNED`, and every command that
+was written and not yet executed completes `DROPPED` with detail "device time jumped on a late
+PPS edge", with an event. A command falling due in the short window between the edge and its
+adoption can run at the wrong wall time and still report on time. "PPS" means whatever drives the scheduler's PPS input. On the
 ZU11EG hopcap image, that is an external PPS when one is connected, and
 otherwise Corundum's free-running PTP second. Either way it is not GNSS
 time unless an external GNSS PPS is wired.
