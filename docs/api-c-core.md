@@ -341,7 +341,10 @@ struct datax_completion {
   its timestamp minus the guard margin completes `DATAX_COMPLETION_LATE`
   (detail "host could not keep the queue fed") and is never written. A
   command already inside the guard margin when `commit()` is called makes
-  `commit()` return `DATAX_ERR_LATE`, and nothing in that batch is written.
+  `commit()` return `DATAX_ERR_LATE`. The same is true of a spacing
+  violation, which returns `-EINVAL`. In either case **the whole uncommitted
+  batch is discarded**: nothing in it is written, and its sequence ids are
+  no longer known to `wait()`.
 - **Late never executes silently.** Commands are queued with drop-on-late.
   A command the hardware finds late completes `LATE` (when reported) and
   is counted, and the count raises `DATAX_EVT_LATE_COMMAND`.
@@ -354,8 +357,11 @@ struct datax_completion {
   measured when the scheduler is created. A completion drained later than
   the next reported command's time marks that command `LATE`, with detail
   "poller lagged". `wait(seq)` on a command that was not reported returns
-  `-EINVAL`. A reported command whose completion never arrives completes
-  `DROPPED`, with detail naming the scheduler's overflow count.
+  `-EINVAL`. A reported command whose completion is proven lost completes
+  `DROPPED`, with detail naming the scheduler's overflow count. It is
+  proven lost when its time has passed, the completion slot has been seen
+  empty since, and no record arrived. Until that is proven, `wait()`
+  returns `-ETIMEDOUT`.
 - **Reserved lines.** On platforms where a scheduler GPIO line triggers
   hops, `queue_gpio` refuses a mask that touches that line (`-EINVAL`);
   only `queue_tune` drives it.
