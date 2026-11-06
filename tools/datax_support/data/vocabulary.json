@@ -105,6 +105,9 @@
     },
     "sdk-context": {
       "name": "SDK context and device objects"
+    },
+    "sdk-timed": {
+      "name": "SDK timed control (scheduler, timed tunes, device time)"
     }
   },
   "capability_platforms": [
