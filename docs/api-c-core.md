@@ -210,7 +210,15 @@ struct datax_block_info {
   `datax_context_destroy()` wait up to one context timeout; with an
   infinite context timeout they can block.
 - **Lifetime.** `datax_context_destroy()` destroys the context's streams;
-  stream handles are invalid afterwards.
+  stream handles are invalid afterwards. Drain results are reported only
+  by `stop()`; `destroy()` drains but returns nothing.
+- **Threads.** A stream is driven by one thread at a time. Stream I/O
+  does not take the context lock (only claiming and releasing the
+  device's per-direction slot does), so separate streams can run on
+  separate threads. The last error is per context and shared by every
+  thread using that context.
+- **Mode latch.** A stream's copying-or-zero-copy mode is fixed by its
+  first `recv`/`send`/`get_block`/`put_block` call, even one that fails.
 - **Overflow.** When the converter core reports a DMA overflow, the next RX
   block is marked `discontinuous`. Over GigE this is the normal case at
   native rates. Where the core's status cannot be read, `discontinuous` is
