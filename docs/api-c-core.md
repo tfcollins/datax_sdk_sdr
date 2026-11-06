@@ -146,7 +146,7 @@ edge when the hardware sees one within 2 s, and the source becomes
 - `DATAX_EVT_PPS_LOCK_CHANGE` fires, naming the fallback.
 
 The software offset is applied wherever device time crosses the API.
-Losing PPS after alignment gives `PPS_HOLDOVER`. A PPS that appears later
+Losing PPS after alignment gives `PPS_HOLDOVER` where the hardware reports a live PPS (the current Tick latches "PPS seen" until reset, so it cannot, tfcollins/tick#39). A PPS that appears later
 never makes time jump; its event only says that a hard alignment is now
 possible. "PPS" means whatever drives the scheduler's PPS input. On the
 ZU11EG hopcap image, that is an external PPS when one is connected, and
