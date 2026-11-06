@@ -377,12 +377,14 @@ through a **polled one-entry window** with no interrupt. Naive per-call
 submission would bottleneck and lose completions. The SDK therefore:
 
 - **batches** — `queue_*` builders accumulate descriptors client-side,
-  sorted by timestamp; `commit()` writes them back-to-back in one pass,
-  respecting queue-depth headroom from the capability limits;
-- **polls centrally** — one SDK thread drains the completion window into
-  a per-scheduler ring sized to the queue depth, acking each entry;
-  `wait`/`get_completions` read the ring and never race the hardware
-  window;
+  sorted by timestamp; `commit()` hands the batch to the scheduler's
+  thread, which streams it into the hardware queue in timestamp order,
+  keeping one entry spare (see "Scheduler semantics");
+- **polls centrally** — the same thread drains the completion window into
+  a per-scheduler completion table, acking each entry, and delivers
+  events; `wait`/`get_completions` read the table and never race the
+  hardware window. Event callbacks run on that thread, so a callback must
+  not call `datax_sched_wait` (it returns `-EDEADLK`);
 - **stays replaceable** — the builder/commit shape is exactly what a
   future kernel fast path (chardev bulk submit, IRQ-driven completions —
   a Tick roadmap item) wants. When it lands, `commit()` becomes one
