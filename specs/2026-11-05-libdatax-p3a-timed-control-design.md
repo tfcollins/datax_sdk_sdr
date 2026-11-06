@@ -1,7 +1,7 @@
 # Design: libdatax P3a — timed control on the ADRV9009-ZU11EG
 
 Date: 2026-11-05
-Status: draft. The owner said "go ahead, start P3" and opted out of questions. Every decision
+Status: implemented 2026-11-06 (libdatax main, phase exit); tron green, see "Phase exit evidence". Originally drafted under the owner's "go ahead, start P3" with questions opted out.
 below is the implementer's call and is marked as such. A builder check and a hardware spike
 (section "Spike") come before the plan.
 Board: P3 on <https://github.com/users/tfcollins/projects/4>
@@ -75,10 +75,11 @@ Two of the timed capabilities need fabric that no tron image has today:
 4. **The scheduler is a host-side batcher plus one poller thread per scheduler**, exactly as
    api-c-core's "Abstracting the Tick submission bottleneck" section describes.
    - `queue_*` builders append 48-byte descriptors client-side, kept sorted by timestamp.
-   - `commit()` writes them back-to-back to `command_descriptor` (CSV of twelve 32-bit words, the
-     P1 packer) within the queue-depth headroom read from `queue_level`/`queue_depth`. It returns
-     `-EAGAIN` with a count if the batch exceeds the headroom: the caller commits the rest later,
-     and nothing is silently held.
+   - `commit()` accepts any batch. The poller streams descriptors to `command_descriptor` (CSV of
+     twelve 32-bit words, the P1 packer) in timestamp order, keeping `queue_level` at most
+     `queue_depth - 1`. A descriptor the host could not write before its time minus the guard margin
+     completes `LATE` ("host could not keep the queue fed") and is never written. This refines the
+     earlier `-EAGAIN` idea and follows hopcap's lookahead feeder. The API page has it.
    - The poller drains the one-entry completion window (`completion_*` attributes, then
      `completion_ack`) into a ring sized to the queue depth.
    - `wait(seq)` and `get_completions()` read the ring.
@@ -334,7 +335,7 @@ Checked against the Tick RTL at the pinned revision (`axi_timed_command_schedule
      `DATAX_COMPLETION_LATE` (detail "poller lagged; execution may have been held"), and
      `DATAX_EVT_LATE_COMMAND` fires.
    - **Default reporting is sparse.** `queue_gpio` and `queue_marker` do not report unless the
-     caller asks (a `report` flag on the builder). `queue_tune` reports its rising edge only, which is
+     caller asks (`datax_sched_report(sched, seq)` on a queued command). `queue_tune` reports its rising edge only, which is
      hopcap's proven pattern. `wait(seq)` on an unreported sequence returns `-EINVAL`.
    - The real fix belongs upstream in Tick: record the actual dispatch tick, and report
      `LATE_EXECUTED` when the stall delayed it (tfcollins/tick#38). When it lands, the spacing
@@ -371,3 +372,27 @@ Checked against the Tick RTL at the pinned revision (`axi_timed_command_schedule
 - The poller interval: start at 1 ms, and make it a scheduler option if needed.
 - How Python marshals events onto its thread.
 - The CSV formatting details, which the P1 packer already pins.
+
+## Phase exit evidence (2026-11-06)
+
+- **tron (ADRV9009-ZU11EG)**: 21 passed, 6 skipped, at libdatax `3392cd7`, on hopcap's SFP image with
+  the Tick PPS selector (XSA `6292e762…`), with nothing on the external PPS input. The skips are the
+  P2 TX and loopback tests, because TX DMA feeds vrt49's deframer on this image. The evidence and
+  image hashes are in `docs/evidence/p3a/`.
+- **Changed by hardware:**
+  - the priming lead is at least the guard margin, and the poller wakes at the priming edge;
+  - the first timed tune on this board must be at least now + 20 ms ahead.
+
+  Found by run 2 ("stage late" on the second tune) and fixed in `1d8c6c9`.
+- **Changed by the final review:**
+  - an unexecuted fall parks GPIO bit 0;
+  - an alignment resets the FHM history, refreshes the poller's time snapshot, and returns `-EBUSY`
+    while a tune is live.
+
+  Run 5 caught the stale snapshot after a hard PPS load (`7679d86`).
+- **Matrix:** `timed-gpio`, `fhm-hop`, `sdk-timed` and `mcs` are *integration artifacts* until
+  `hw-test.yml` has a green run (freeze rule).
+- **`PHASE_COHERENT`:** stays false, because `adi,dig-clocks-rf-pll-phase-sync-mode` is not enabled.
+- **Not covered here:**
+  - REQ-TEST-031 and REQ-TEST-032 need RF cabling;
+  - REQ-TEST-022's timed-capture and gated-burst items moved to P3b (datax_sdk_sdr#28).

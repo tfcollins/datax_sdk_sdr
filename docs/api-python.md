@@ -58,9 +58,9 @@ submits the batch ({doc}`api-c-core`):
 sched = dev.scheduler
 t0 = dev.time.now + dev.time.seconds(0.5)
 
+sched.at(t0).marker(line=0)          # scope-visible start edge (unreported)
 for i, f in enumerate(hop_plan):
     sched.at(t0 + i * dwell).tune(f)
-sched.at(t0).marker(line=0, report=True)   # scope-visible start edge
 sched.commit()
 sched.wait_all(timeout=2.0)          # raises LateError on any late hop
 ```
@@ -72,6 +72,10 @@ every Nth one when hops are dense), `gpio` and `marker` report with
 (`LateError`, or `Error` `EINVAL` for report spacing) discards the batch.
 `dev.stage_hop_table(freqs)` must precede `tune`, and the first tune needs
 the guard margin plus a priming lead. Queue dense hops in one commit.
+`sched.flush()` cancels everything outstanding and returns the
+`Completion` list of the reported commands it ended (`FLUSHED`, plus any
+already finished but not yet waited for); those seqs are consumed, so a
+later `wait` on them raises `datax.Error` (`EINVAL`).
 
 ```python
 dev.time.align_next_pps(epoch=0)     # hard on a PPS edge, else soft (host clock)

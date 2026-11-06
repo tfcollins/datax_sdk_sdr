@@ -8,7 +8,7 @@
 | `TIMESTAMPS` | — | validated |
 | `FASTLOCK_HOP` | integration artifacts | — |
 | `FHM_HOP` | — | validated |
-| `MCS` | — | — |
-| `PHASE_COHERENT` | — | — |
+| `MCS` | — | integration artifacts |
+| `PHASE_COHERENT` | — | integration artifacts |
 | `NET_OFFLOAD_NIC` | — | validated |
 | `NET_OFFLOAD_SAMPLES` | integration artifacts | validated |

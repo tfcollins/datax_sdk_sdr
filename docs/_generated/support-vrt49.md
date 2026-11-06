@@ -1,6 +1,6 @@
 | Platform | Feature | Status | Tier | Evidence |
 |---|---|---|---|---|
-| AD9081-FMCA-EBZ / ZCU102 | VITA 49.2 over UDP, 10G | integration artifacts | 1 | [evidence](https://github.com/tfcollins/vrt49/blob/main/doc/source/projects/ad9081_zcu102.md) (private repository) |
+| AD9081-FMCA-EBZ / ZCU102 | VITA 49.2 over UDP, 10G (4x10G, one 250 MSPS channel per link; host receiver and HDL IP tested, project and hardware pending) | integration artifacts | 1 | [evidence](https://github.com/tfcollins/vrt49/blob/main/doc/source/projects/ad9081_zcu102.md) (private repository) |
 | ADRV9002 / ZCU102 (`mini2`) | VITA 49.2 over UDP, 10G (4x10G striped; exact-boot HIL exists) | integration artifacts | 2 | [evidence](https://github.com/tfcollins/vrt49/blob/main/doc/source/how-to/adrv9002-zcu102-4x10g.md) (private repository) |
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | Corundum NIC | validated | 2 | [evidence](https://github.com/tfcollins/vrt49/blob/main/doc/source/tutorials/hw-results-zu11eg.md) (private repository) |
 | ADRV9009-ZU11EG / ADRV2CRR-FMC (`tron`) | stream gate (fabric hop gating is exercised by hopcap) | integration artifacts | 1 | [evidence](https://github.com/tfcollins/vrt49/blob/main/doc/source/projects/adrv9009zu11eg.md) (private repository) |

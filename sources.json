@@ -13,10 +13,10 @@
     "vrt49": {
       "repository": "tfcollins/vrt49",
       "branch": "main",
-      "revision": "0edc3be397b3191d11c7d776c8852f489b504d2f",
+      "revision": "e5ed5cd9d047f8f8889fd15140578a0b03df45e8",
       "path": "support.json",
       "private": true,
-      "why": "main after #73 (ZU11EG TX rows: vrt-tx-dma validated, vrt-tx-offload planned) merged"
+      "why": "main after #75 (AD9081 4x10G note on the vrt-udp-10g row)"
     },
     "libiio": {
       "repository": "tfcollins/libiio",
@@ -37,10 +37,10 @@
     "libdatax": {
       "repository": "tfcollins/libdatax",
       "branch": "main",
-      "revision": "1c8035481b66efe80c0aa7315ff1ccde5d4fdcf1",
+      "revision": "0cdd186a1bf72ff19453d1963f32f9f68a6fec03",
       "path": "support.json",
       "private": false,
-      "why": "main at P2 phase exit (streaming-rx/tx hardware-proven on lablp and tron; integration-artifacts until hw-test.yml runs)"
+      "why": "main at P3a phase exit (timed-gpio, fhm-hop, sdk-timed, mcs on the ZU11EG; integration-artifacts until hw-test.yml runs)"
     }
   }
 }

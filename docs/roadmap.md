@@ -30,7 +30,7 @@ REQ-TEST-040 live (CI `-W` + linkcheck + Pages deploy).
 
 ## P1 — SDK skeleton
 
-**Status: not started.** First code task. `libdatax` context/device
+**Status: done (2026-11-04).** First code task. `libdatax` context/device
 over libiio + Python bindings + capability framework. Runs against
 *any* IIO device — no Tick, no target hardware needed. **Exit**:
 REQ-TEST-001/002 passing; API matches {doc}`api-c-core` or the doc is
@@ -50,6 +50,21 @@ REQ-TEST-021 smoke green on both labgrid places; REQ-TEST-030's digital
 loopback part on both.
 
 ## P3 — Timed control, ADRV9009-ZU11EG
+
+**Status: P3a done (2026-11-06); P3b next.** P3 is split in two (design:
+libdatax `docs/superpowers/specs/2026-11-05-libdatax-p3a-timed-control-design.md`).
+**P3a** exposes what tron's existing fabric already does: the scheduler (timed
+GPIO, completions, events), FHM timed tunes on chip A, device time with a PPS
+fallback (hopcap's Tick PPS selector uses Corundum's PTP PPS when nothing drives
+the external input) and MCS verification. Hardware-proven on `tron`; the
+matrix rows are *integration artifacts* until libdatax `hw-test.yml` has a
+green run (REQ-TEST-041/042). `PHASE_COHERENT` stays false: the device tree has
+no RF PLL phase sync. **P3b** adds the HDL for timed DMA streams on this board
+(a gated `data_offload` on RX and TX driven by Tick's `CAPTURE_ARM` and
+`TRANSMIT_ARM`, the timestamp tagger, a chip-B FHM trigger) and then
+`stream_start_at`, stream gating and DMA timestamps; REQ-TEST-022's timed-capture
+and gated-burst items move there. Open for either half: REQ-TEST-031 settle and
+REQ-TEST-032 phase-coherence measurements need RF cabling on `tron`.
 
 The timed API surface (`start_at`, scheduler, FHM hops, MCS) on `tron`.
 Both gates this phase once carried are satisfied: Tick is validated on

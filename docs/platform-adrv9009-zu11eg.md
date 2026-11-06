@@ -35,6 +35,17 @@ path, and the hopcap application.
   TX I/Q orientation independently (REQ-TEST-030 RF part). RX streams at
   about 53 MB/s for one channel (recorded). Evidence:
   [libdatax docs/evidence/p2](https://github.com/tfcollins/libdatax/tree/main/docs/evidence/p2).
+- **P3a timed control proven on hardware 2026-11-06** (matrix: integration
+  artifacts until `hw-test.yml` runs) on `tron`, on hopcap's SFP image with
+  the Tick PPS selector. Through `libdatax`: a GPIO staircase on exact ticks,
+  a late command dropped without executing, FHM timed tunes on chip A (hop
+  schedule with the priming edge onto `fhmInitFrequency`, dense hops, exact
+  PLL readback across 2.4-2.5 GHz), PPS-aligned device time with nothing on
+  the external PPS input (Corundum's PTP PPS is the fallback), and MCS
+  verification. The first timed tune must be at least now + 20 ms ahead on
+  this board. On this image TX DMA feeds vrt49's deframer, so the P2 TX tests
+  skip and P2 RX runs as the regression. Evidence:
+  [libdatax docs/evidence/p3a](https://github.com/tfcollins/libdatax/tree/main/docs/evidence/p3a).
 - **Tick, validated on `tron`** (`hdl_2026_r1`, Vivado 2025.1):
   scheduler at PS-physical `0x8600_0000`, measured 99.9989 MHz tick
   rate, JTAG production boot with the Tick PL in place before Linux
@@ -85,8 +96,9 @@ timestamps come from the vrt49 framer, not from a Tick tagger on the
 DMA path). What remains: the DMA-path tagger and `sync_ext` wiring if
 the SDK keeps a DMA streaming path on this board, the scope-evidence
 staircase against PPS (REQ-TEST-023) that Tick's `tron` suite does not
-yet produce, and exposing all of it through `libdatax` (P3 as
-re-baselined in {doc}`roadmap`).
+yet produce. Exposing the scheduler, FHM hops, PPS time and MCS
+through `libdatax` is done (P3a); the DMA-path pieces are P3b
+({doc}`roadmap`).
 
 ## Network and sample plane (delivered by vrt49, exercised by hopcap)
 
@@ -105,6 +117,11 @@ the dataflow and the first captures.
 Dual-chip phase coherence is this platform's defining capability; the
 procedure and the SDK contract (`run_mcs()`, live `PHASE_COHERENT` state,
 coherence-gated streams) are specified in {doc}`timing-synchronization`.
+In P3a `run_mcs()` verifies the JESD and MCS state that the kernel's
+JESD204 FSM already ran at boot; it does not re-run the sequence.
+`PHASE_COHERENT` stays false because the device tree enables no RF PLL
+phase sync, and the cross-chip phase measurement (REQ-TEST-032) needs RF
+cabling `tron` does not have yet.
 
 ## Capability profile
 
@@ -116,5 +133,7 @@ n/a (no AD936x). Infrastructure status per row is in
 {doc}`support-matrix`: `TIMED_COMMANDS` and `FHM_HOP` are validated;
 `STREAM_GATE` and `TIMESTAMPS` are validated on the VRT path through
 hopcap; `RX_ARM`/`TX_ARM` on the DMA path, `MCS` and `PHASE_COHERENT`
-have no infrastructure row yet. P3 is therefore mostly, not purely,
-SDK-API work on this board.
+have no infrastructure row yet. libdatax P3a adds `timed-gpio`,
+`fhm-hop`, `sdk-timed` and `mcs` rows for this board (integration
+artifacts); `MCS` is verification only and `PHASE_COHERENT` is
+unreachable on the current device tree.

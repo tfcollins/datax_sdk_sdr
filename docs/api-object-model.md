@@ -141,14 +141,14 @@ Capabilities by platform *and phase* — the phase gates are defined in the
 | Capability | ADRV9361-Z7035 | ADRV9009-ZU11EG |
 |---|---|---|
 | Streaming (immediate) | P2 | P2 |
-| `TIMED_COMMANDS` | P4 — Tick in vrt49's 1G SFP design, RF settle open | P3 — Tick validated, API exposure |
-| `RX_ARM` / `TX_ARM` | P4 | P3 |
-| `STREAM_GATE` | P4 | P3 |
-| `TIMESTAMPS` | P4 | P3 |
+| `TIMED_COMMANDS` | P4 — Tick in vrt49's 1G SFP design, RF settle open | P3a — done 2026-11-06 (libdatax on Tick) |
+| `RX_ARM` / `TX_ARM` | P4 | P3b — needs a gated `data_offload` |
+| `STREAM_GATE` | P4 | P3b (DMA path) |
+| `TIMESTAMPS` | P4 | P3b (DMA-path tagger) |
 | `FASTLOCK_HOP` | P4 | — (n/a) |
-| `FHM_HOP` | — (n/a) | P3 |
-| `MCS` | — (single chip) | P3 |
-| `PHASE_COHERENT` | — | P3 (post-MCS state) |
+| `FHM_HOP` | — (n/a) | P3a — done, chip A (chip B trigger in P3b) |
+| `MCS` | — (single chip) | P3a — done, verification of the boot-time sequence |
+| `PHASE_COHERENT` | — | false until the device tree enables RF PLL phase sync |
 | `NET_OFFLOAD_NIC` | P5 — 1G SFP shipped; 10G GTX wrapper (highest-risk) | P5 — vrt49 Corundum design validated |
 | `NET_OFFLOAD_SAMPLES` | P6 — subsets only | P6 |
 

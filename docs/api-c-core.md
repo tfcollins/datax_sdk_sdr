@@ -158,6 +158,14 @@ ZU11EG hopcap image, that is an external PPS when one is connected, and
 otherwise Corundum's free-running PTP second. Either way it is not GNSS
 time unless an external GNSS PPS is wired.
 
+`set_time_next_pps` returns `-EBUSY` while any timed tune is live,
+including one still in the builder ("a timed tune is queued or not yet
+committed; commit and wait for it, or flush, before aligning time"). After
+any change to device time (an alignment, or an adopted late PPS edge), the
+next tune gets a new priming edge, so it needs `when ≥ now + guard + lead`.
+A late-edge adoption also drops the timed tunes it had not yet written,
+with the same detail.
+
 **Hop staging.** `stage_hop_table` records the set of frequencies a timed
 tune may use (up to `DATAX_LIMIT_HOP_TABLE_DEPTH`). On the ZU11EG it
 enables Talise FHM. The engine is one stage deep, so the scheduler emits a
@@ -383,6 +391,9 @@ struct datax_completion {
   proven lost when its time has passed, the completion slot has been seen
   empty since, and no record arrived. Until that is proven, `wait()`
   returns `-ETIMEDOUT`.
+- **The implicit scheduler lives as long as the context.** After a timed
+  device call has created it, `datax_sched_create` on that device returns
+  `-EBUSY` until the context is destroyed.
 - **Reserved lines.** On platforms where a scheduler GPIO line triggers
   hops, `queue_gpio` refuses a mask that touches that line (`-EINVAL`);
   only `queue_tune` drives it.
@@ -453,4 +464,8 @@ int datax_context_set_event_callback(struct datax_context *ctx,
 
 Callbacks fire on the SDK's poller thread and must not block; a NULL
 callback disables delivery (errors remain visible through return codes
-and completions).
+and completions). One exception: when the device has no scheduler,
+`DATAX_EVT_PPS_LOCK_CHANGE` from `set_time_next_pps` or `get_time` fires
+synchronously on the calling thread, inside that call. Destroying the
+scheduler or the context from a callback is ignored (both calls return
+`void`); destroy them from another thread.
