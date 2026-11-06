@@ -162,7 +162,16 @@ time unless an external GNSS PPS is wired.
 tune may use (up to `DATAX_LIMIT_HOP_TABLE_DEPTH`). On the ZU11EG it
 enables Talise FHM. The engine is one stage deep, so the scheduler emits a
 priming edge, which lands on the chip's FHM initial frequency, and keeps
-one frequency staged ahead. Every tune is checked by PLL readback. Hops
+one frequency staged ahead. Every *reported* tune is checked by PLL readback; with
+dense hops only every Nth tune reports (to keep the report spacing), and `wait()` on
+an unreported tune returns `-EINVAL`. Tunes must be queued in time order, and the
+first tune after staging (or after the hop schedule has run dry) needs `when` at
+least the guard margin plus one priming lead ahead, because the scheduler inserts a
+priming edge before it. A tune whose previous edge is known not to have fired
+completes `DROPPED` ("lands one behind"). A timed `set_frequency` keeps no
+completion; a non-OK outcome raises `DATAX_EVT_LATE_COMMAND` naming the status.
+Staging enables FHM, which briefly restarts the transceiver's radio, so stage before
+starting streams; libdatax disables FHM again when the context is destroyed. Hops
 need about `DATAX_LIMIT_HOP_STAGE_US` between them. Timed tunes are
 supported on the channels whose chip has its hop trigger wired to the
 scheduler; elsewhere they return `-ENOTSUP` naming the chip.
