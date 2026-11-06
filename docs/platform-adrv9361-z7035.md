@@ -24,7 +24,14 @@ that costs.
 ## What exists today
 
 - Stock ADI HDL reference design (`adrv9361z7035`) and Linux support —
-  the P2 streaming MVP needs nothing new.
+  the P2 streaming MVP needs nothing new. **P2 streaming proven on hardware
+  2026-11-05** (matrix: integration artifacts until `hw-test.yml` runs) on `lablp` (stock Kuiper 2023_R2, `hdl_2023_r2` PL, stock
+  `iiod` 0.26, libdatax from a lab host over `ip:`): the hardware suite
+  passed 10/10. Digital loopback (`ad9361-phy` debug `loopback`=1) is
+  bit-exact as TX >> 4 on both channels. One I/Q pair streams RX at
+  about 41–47 MB/s (recorded, not asserted). DMA overflow is detected
+  through the RX core's status register. Evidence:
+  [libdatax docs/evidence/p2](https://github.com/tfcollins/libdatax/tree/main/docs/evidence/p2).
 - **Tick in the vrt49 1G SFP design** (`adrv9361z7035_vrt49_sfp`): the
   vendored `axi_timed_command_scheduler`, and `vrt49_ad9361_hop_ctrl`
   at `0x44AB0000` driving the AD9361 `fastlock_select` pins from

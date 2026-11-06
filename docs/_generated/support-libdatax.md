@@ -1,5 +1,7 @@
 | Platform | Feature | Status | Tier | Evidence |
 |---|---|---|---|---|
-| ADRV9009-ZU11EG / ADRV2CRR-FMC | immediate RX streaming (P2) | planned | — | — |
-| ADRV9361-Z7035 | immediate RX streaming (P2) | planned | — | — |
+| ADRV9009-ZU11EG / ADRV2CRR-FMC | immediate RX streaming (PL: HDL main 085a6ed7 build with stock 2023_R2 kernel/DTB; digital loopback bit-exact (I/Q exchanged); controller-run hardware sessions 2026-11-05 — validated after the first green hw-test.yml run (needs self-hosted runners)) | integration artifacts | 2 | [evidence](https://github.com/tfcollins/libdatax/blob/main/docs/evidence/p2/README.md) |
+| ADRV9009-ZU11EG / ADRV2CRR-FMC | immediate TX streaming (PL: HDL main 085a6ed7 build with stock 2023_R2 kernel/DTB; digital loopback bit-exact (I/Q exchanged); controller-run hardware sessions 2026-11-05 — validated after the first green hw-test.yml run (needs self-hosted runners)) | integration artifacts | 2 | [evidence](https://github.com/tfcollins/libdatax/blob/main/docs/evidence/p2/README.md) |
+| ADRV9361-Z7035 | immediate RX streaming (stock Kuiper 2023_R2; digital loopback bit-exact (TX>>4); controller-run hardware sessions 2026-11-05 — validated after the first green hw-test.yml run (needs self-hosted runners)) | integration artifacts | 2 | [evidence](https://github.com/tfcollins/libdatax/blob/main/docs/evidence/p2/README.md) |
+| ADRV9361-Z7035 | immediate TX streaming (stock Kuiper 2023_R2; digital loopback bit-exact (TX>>4); controller-run hardware sessions 2026-11-05 — validated after the first green hw-test.yml run (needs self-hosted runners)) | integration artifacts | 2 | [evidence](https://github.com/tfcollins/libdatax/blob/main/docs/evidence/p2/README.md) |
 | host | SDK context and device objects (context, device, capabilities, Tick time, Python package; emulator-backed Tier 1) | validated (software) | 1 | [evidence](https://github.com/tfcollins/libdatax#readme) |

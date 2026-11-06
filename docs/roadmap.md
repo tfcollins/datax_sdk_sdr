@@ -38,6 +38,8 @@ amended first (REQ-DOC-001).
 
 ## P2 — Streaming MVP
 
+**Status: done (2026-11-05).** libdatax streams (RX/TX, one-shot and cyclic, zero-copy) validated on both labgrid places: `lablp` 10/10 and `tron` 12/12, digital loopback bit-exact on every channel. tron ran an HDL `main` PL, not stock 2023_R2 ({doc}`platform-adrv9009-zu11eg`). The matrix rows stay *integration artifacts* until `hw-test.yml` has a green run, which needs self-hosted runners for libdatax (REQ-TEST-041/042).
+
 Stream objects over AXI-DMAC on both boards, stock reference designs.
 Immediate start/stop, RX/TX, cyclic TX, zero-copy paths. The transport is
 libiio v1 blocks over the stock DMA devices, reached from the host

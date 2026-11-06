@@ -37,10 +37,10 @@
     "libdatax": {
       "repository": "tfcollins/libdatax",
       "branch": "main",
-      "revision": "dbce99a5f5fee6fbae12dfb299df472f9eb4382b",
+      "revision": "1c8035481b66efe80c0aa7315ff1ccde5d4fdcf1",
       "path": "support.json",
       "private": false,
-      "why": "P1 complete (tasks 1-9 + final-review fixes) 2026-11-04"
+      "why": "main at P2 phase exit (streaming-rx/tx hardware-proven on lablp and tron; integration-artifacts until hw-test.yml runs)"
     }
   }
 }

@@ -23,7 +23,18 @@ path, and the hopcap application.
 ## What exists today
 
 - Stock ADI HDL reference design + Linux (JESD204-FSM) support — P2
-  streaming needs nothing new.
+  streaming needs nothing new. **P2 streaming proven on hardware
+  2026-11-05** (matrix: integration artifacts until `hw-test.yml` runs) on `tron` (12/12). The PL was **not** stock 2023_R2: it was
+  the recovery bitstream (sha256 `a22f4cf6…`, `hdl_system_id` HDL `main`
+  `085a6ed7`, 2026-06-09), with the stock 2023_R2 Kuiper kernel and DTB
+  and stock `iiod` 0.26. On this image `axi-adrv9009-tx-hpc` names its
+  scan channels `voltage0..7` (interleaved I/Q), while RX uses
+  `voltage{n}_i/_q`. Digital loopback needs `bist_framer_a_loopback`=1 on
+  both phys (register 0x1532 bit 7). It is bit-exact on all four channels
+  with I and Q exchanged and unit gain; an RF loopback would confirm the
+  TX I/Q orientation independently (REQ-TEST-030 RF part). RX streams at
+  about 53 MB/s for one channel (recorded). Evidence:
+  [libdatax docs/evidence/p2](https://github.com/tfcollins/libdatax/tree/main/docs/evidence/p2).
 - **Tick, validated on `tron`** (`hdl_2026_r1`, Vivado 2025.1):
   scheduler at PS-physical `0x8600_0000`, measured 99.9989 MHz tick
   rate, JTAG production boot with the Tick PL in place before Linux
