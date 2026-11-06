@@ -186,8 +186,14 @@ struct datax_block_info {
   `-EBUSY`. A cyclic stream starts transmitting at that `send`, not at
   `start()`, so enable errors surface there.
 - **`get_block`/`put_block`**: RX lends the next filled block, TX lends a
-  free one. Mixing copying and zero-copy calls on one stream returns
-  `-EINVAL`.
+  free one. Blocks go back in the order they were lent (`-EINVAL`
+  otherwise, and for a pointer that is not a lent block). When every block
+  is lent, `get_block` returns `-EBUSY`, and a failed `get_block` sets
+  `*data` to NULL. `stop()` invalidates every lent block. Mixing copying
+  and zero-copy calls on one stream returns `-EINVAL`.
+- **`send` return value**: the number of instants accepted. It is a
+  partial count when the wait for a free block timed out after some data
+  was taken, and `-ETIMEDOUT` when none was.
 - **`timeout_ms`**: < 0 waits forever, 0 polls, > 0 waits up to that long.
   The bound is approximate: a single libiio block operation waits up to
   the libiio context timeout in force when the stream was created, on
