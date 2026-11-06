@@ -37,8 +37,10 @@ graph LR
 | `datax_sched` | `datax.Scheduler` | `dev.scheduler` (lazy, caps-gated) |
 | `datax_caps` | `datax.Capabilities` | `dev.caps`, supports `in` |
 | `datax_time` | `int` ticks + `dev.time` helpers | `dev.time.now`, `dev.time.seconds(x)` |
-| negative errno | `datax.Error` subclasses | `LateError`, `OverflowError`, `CapabilityError` |
-| event callback | `ctx.on_event(fn)` | delivered on a Python thread |
+| negative errno | `datax.Error` subclasses | `LateError` (`DATAX_ERR_LATE`), `BusyError` (`-EBUSY`), `DeadlockError` (`-EDEADLK`), `CapabilityError` (`-ENOTSUP`), `OverflowError` |
+| `datax_completion` | `datax.Completion` | `.seq`, `.status` (`datax.CompletionStatus`), `.requested_ticks`, `.executed_ticks`, `.detail` |
+| `datax_time_source` | `datax.TimeSource` | `dev.time.source` |
+| event callback | `ctx.on_event(fn)` | `fn(type, ticks, seq, detail)` with `type` a `datax.EventType`; runs on the scheduler's poller thread, never after `ctx.close()`; must not block (`sched.wait` there raises `DeadlockError`); exceptions are logged and swallowed |
 
 Convenience layer (matching pyadi-iio):
 
@@ -58,9 +60,22 @@ t0 = dev.time.now + dev.time.seconds(0.5)
 
 for i, f in enumerate(hop_plan):
     sched.at(t0 + i * dwell).tune(f)
-sched.at(t0).marker(line=0)          # scope-visible start edge
+sched.at(t0).marker(line=0, report=True)   # scope-visible start edge
 sched.commit()
 sched.wait_all(timeout=2.0)          # raises LateError on any late hop
+```
+
+Only reported commands have completions: `tune` reports its hop edge (only
+every Nth one when hops are dense), `gpio` and `marker` report with
+`report=True`. `wait(seq)` on an unreported command raises `datax.Error`
+(`EINVAL`); `wait_all` skips unreported tunes. A rejected `commit()`
+(`LateError`, or `Error` `EINVAL` for report spacing) discards the batch.
+`dev.stage_hop_table(freqs)` must precede `tune`, and the first tune needs
+the guard margin plus a priming lead. Queue dense hops in one commit.
+
+```python
+dev.time.align_next_pps(epoch=0)     # hard on a PPS edge, else soft (host clock)
+print(dev.time.source)               # datax.TimeSource.PPS_ALIGNED / SOFT_ALIGNED / FREE_RUN
 ```
 
 ## Worked examples (spec-level)
