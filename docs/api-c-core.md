@@ -172,7 +172,11 @@ completes `DROPPED` ("lands one behind"). A timed `set_frequency` keeps no
 completion; a non-OK outcome raises `DATAX_EVT_LATE_COMMAND` naming the status.
 Staging enables FHM, which briefly restarts the transceiver's radio, so stage before
 starting streams; libdatax disables FHM again when the context is destroyed. Hops
-need about `DATAX_LIMIT_HOP_STAGE_US` between them. Timed tunes are
+need about `DATAX_LIMIT_HOP_STAGE_US` between them. The hop trigger pulse is 10 ms
+wherever the schedule allows, and narrower only between dense hops in the same
+commit. So queue a dense hop sequence in one commit: the first tune of a later
+commit (or a repeated timed `set_frequency`) must be at least 20 ms after the
+previous committed tune. Timed tunes are
 supported on the channels whose chip has its hop trigger wired to the
 scheduler; elsewhere they return `-ENOTSUP` naming the chip.
 
