@@ -165,9 +165,12 @@ priming edge, which lands on the chip's FHM initial frequency, and keeps
 one frequency staged ahead. Every *reported* tune is checked by PLL readback; with
 dense hops only every Nth tune reports (to keep the report spacing), and `wait()` on
 an unreported tune returns `-EINVAL`. Tunes must be queued in time order, and the
-first tune after staging (or after the hop schedule has run dry) needs `when` at
-least the guard margin plus one priming lead ahead, because the scheduler inserts a
-priming edge before it. A tune whose previous edge is known not to have fired
+first tune after staging (or after the hop schedule has run dry, or a timed
+`set_frequency` that needs a new priming edge) needs `when` at least the guard
+margin plus one priming lead ahead, because the scheduler inserts a priming edge
+before it. The priming lead is at least the guard margin, so on the ZU11EG the
+first tune needs `when ≥ now + 20 ms`; an earlier one is refused with
+`DATAX_ERR_LATE`. A tune whose previous edge is known not to have fired
 completes `DROPPED` ("lands one behind"). A timed `set_frequency` keeps no
 completion; a non-OK outcome raises `DATAX_EVT_LATE_COMMAND` naming the status.
 Staging enables FHM, which briefly restarts the transceiver's radio, so stage before
