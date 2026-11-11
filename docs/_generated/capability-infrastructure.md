@@ -1,6 +1,6 @@
 | Capability | ADRV9361-Z7035 | ADRV9009-ZU11EG / ADRV2CRR-FMC |
 |---|---|---|
-| `Streaming (immediate)` | integration artifacts | integration artifacts |
+| `Streaming (immediate)` | integration artifacts | validated |
 | `TIMED_COMMANDS` | integration artifacts | validated |
 | `RX_ARM` | — | planned |
 | `TX_ARM` | — | — |
@@ -8,7 +8,7 @@
 | `TIMESTAMPS` | — | validated |
 | `FASTLOCK_HOP` | integration artifacts | — |
 | `FHM_HOP` | — | validated |
-| `MCS` | — | integration artifacts |
-| `PHASE_COHERENT` | — | integration artifacts |
+| `MCS` | — | validated |
+| `PHASE_COHERENT` | — | — |
 | `NET_OFFLOAD_NIC` | — | validated |
 | `NET_OFFLOAD_SAMPLES` | integration artifacts | validated |

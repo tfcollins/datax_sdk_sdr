@@ -24,7 +24,7 @@ path, and the hopcap application.
 
 - Stock ADI HDL reference design + Linux (JESD204-FSM) support — P2
   streaming needs nothing new. **P2 streaming proven on hardware
-  2026-11-05** (matrix: integration artifacts until `hw-test.yml` runs) on `tron` (12/12). The PL was **not** stock 2023_R2: it was
+  2026-11-05** on `tron` (12/12); matrix *validated* by libdatax `hw-test.yml` on the nemo lab runner, 2026-11-11 (stock image). The PL was **not** stock 2023_R2: it was
   the recovery bitstream (sha256 `a22f4cf6…`, `hdl_system_id` HDL `main`
   `085a6ed7`, 2026-06-09), with the stock 2023_R2 Kuiper kernel and DTB
   and stock `iiod` 0.26. On this image `axi-adrv9009-tx-hpc` names its
@@ -35,8 +35,8 @@ path, and the hopcap application.
   TX I/Q orientation independently (REQ-TEST-030 RF part). RX streams at
   about 53 MB/s for one channel (recorded). Evidence:
   [libdatax docs/evidence/p2](https://github.com/tfcollins/libdatax/tree/main/docs/evidence/p2).
-- **P3a timed control proven on hardware 2026-11-06** (matrix: integration
-  artifacts until `hw-test.yml` runs) on `tron`, on hopcap's SFP image with
+- **P3a timed control proven on hardware 2026-11-06** (matrix *validated* by
+  libdatax `hw-test.yml` on the nemo lab runner, 2026-11-11, hopcap-sfp image) on `tron`, on hopcap's SFP image with
   the Tick PPS selector. Through `libdatax`: a GPIO staircase on exact ticks,
   a late command dropped without executing, FHM timed tunes on chip A (hop
   schedule with the priming edge onto `fhmInitFrequency`, dense hops, exact
@@ -134,6 +134,6 @@ n/a (no AD936x). Infrastructure status per row is in
 `STREAM_GATE` and `TIMESTAMPS` are validated on the VRT path through
 hopcap; `RX_ARM`/`TX_ARM` on the DMA path, `MCS` and `PHASE_COHERENT`
 have no infrastructure row yet. libdatax P3a adds `timed-gpio`,
-`fhm-hop`, `sdk-timed` and `mcs` rows for this board (integration
-artifacts); `MCS` is verification only and `PHASE_COHERENT` is
+`fhm-hop`, `sdk-timed` and `mcs` rows for this board (validated by
+`hw-test.yml`); `MCS` is verification only and `PHASE_COHERENT` is
 unreachable on the current device tree.

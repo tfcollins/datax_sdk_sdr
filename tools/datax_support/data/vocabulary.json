@@ -161,9 +161,7 @@
       ]
     },
     "PHASE_COHERENT": {
-      "features": [
-        "mcs"
-      ]
+      "features": []
     },
     "NET_OFFLOAD_NIC": {
       "features": [

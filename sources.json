@@ -37,10 +37,10 @@
     "libdatax": {
       "repository": "tfcollins/libdatax",
       "branch": "main",
-      "revision": "0cdd186a1bf72ff19453d1963f32f9f68a6fec03",
+      "revision": "e25aca8e16b1797dc28375b36f6b8e3602525626",
       "path": "support.json",
       "private": false,
-      "why": "main at P3a phase exit (timed-gpio, fhm-hop, sdk-timed, mcs on the ZU11EG; integration-artifacts until hw-test.yml runs)"
+      "why": "main after the first green hw-test.yml on tron (ZU11EG rows validated; Z7035 rows integration-artifacts until a hw-bq runner)"
     }
   }
 }
