@@ -138,23 +138,24 @@ channel-mask width.
 Capabilities by platform *and phase* — the phase gates are defined in the
 {doc}`roadmap`:
 
-| Capability | ADRV9361-Z7035 | ADRV9009-ZU11EG |
-|---|---|---|
-| Streaming (immediate) | P2 | P2 |
-| `TIMED_COMMANDS` | P4 — Tick in vrt49's 1G SFP design, RF settle open | P3a — done 2026-11-06 (libdatax on Tick) |
-| `RX_ARM` / `TX_ARM` | P4 | P3b — needs a gated `data_offload` |
-| `STREAM_GATE` | P4 | P3b (DMA path) |
-| `TIMESTAMPS` | P4 | P3b (DMA-path tagger) |
-| `FASTLOCK_HOP` | P4 | — (n/a) |
-| `FHM_HOP` | — (n/a) | P3a — done, chip A (chip B trigger in P3b) |
-| `MCS` | — (single chip) | P3a — done, verification of the boot-time sequence |
-| `PHASE_COHERENT` | — | false until the device tree enables RF PLL phase sync |
-| `NET_OFFLOAD_NIC` | P5 — 1G SFP shipped; 10G GTX wrapper (highest-risk) | P5 — vrt49 Corundum design validated |
-| `NET_OFFLOAD_SAMPLES` | P6 — subsets only | P6 |
+| Capability | ADRV9361-Z7035 | ADRV9009-ZU11EG | ADRV9009 / ZC706 |
+|---|---|---|---|
+| Streaming (immediate) | P2 — done (validated 2026-11-23) | P2 — done (validated 2026-11-11) | P2 — done (validated 2026-11-23) |
+| `TIMED_COMMANDS` | P4 — Tick in vrt49's 1G SFP design, RF settle open | P3a — done 2026-11-06 (libdatax on Tick) | no phase (no Tick in the stock PL) |
+| `RX_ARM` / `TX_ARM` | P4 | P3b — needs a gated `data_offload` | no phase |
+| `STREAM_GATE` | P4 | P3b (DMA path) | no phase |
+| `TIMESTAMPS` | P4 | P3b (DMA-path tagger) | no phase |
+| `FASTLOCK_HOP` | P4 | — (n/a) | — (n/a) |
+| `FHM_HOP` | — (n/a) | P3a — done, chip A (chip B trigger in P3b) | no phase (needs Tick and the FHM trigger) |
+| `MCS` | — (single chip) | P3a — done, verification of the boot-time sequence | — (single chip) |
+| `PHASE_COHERENT` | — | false until the device tree enables RF PLL phase sync | — (single chip) |
+| `NET_OFFLOAD_NIC` | P5 — 1G SFP shipped; 10G GTX wrapper (highest-risk) | P5 — vrt49 Corundum design validated | no phase |
+| `NET_OFFLOAD_SAMPLES` | P6 — subsets only | P6 | no phase |
 
 "P*n*" = the capability turns on in `libdatax` when that roadmap phase
 exits its acceptance criteria on that platform; "—" = structurally not
-applicable. Full API parity between the two boards is the P4 exit
+applicable; "no phase" = possible on the silicon but no roadmap phase
+targets it (the ZC706 is a streaming board: {doc}`platform-adrv9009-zc706`). Full API parity between the two boards is the P4 exit
 milestone. The **infrastructure** behind each cell — what tick, vrt49
 and hopcap prove today — is tracked per repository in
 {doc}`support-matrix`: on the ZU11EG, `TIMED_COMMANDS`, `FHM_HOP` and

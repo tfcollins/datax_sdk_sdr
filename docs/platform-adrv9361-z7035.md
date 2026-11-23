@@ -68,7 +68,9 @@ vrt49's [Tick hop tutorial](https://github.com/tfcollins/vrt49/blob/main/doc/sou
 (private repository).
 
 1. **Image.** Kuiper 2023_R2_P1 on the SOM's SD card. Set up its boot
-   partition from the `zynq-adrv9361-z7035-fmc` folder. The board autoboots
+   partition: copy `BOOT.BIN` and `devicetree.dtb` from the
+   `zynq-adrv9361-z7035-fmc` folder and `uImage` from `zynq-common` to the
+   partition's root. The board autoboots
    from SD on power-on, which takes about 3 minutes.
 2. **Known-good versions** (from the validating run): PL `hdl_2023_r2`
    (`2156ac7e`, `adrv9361z7035_ccfmc`, LVDS), kernel

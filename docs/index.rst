@@ -76,11 +76,12 @@ Supported targets
        :doc:`platform-adrv9009-zc706`.
    * - AD9081-FMCA-EBZ on ZCU102 (``mini2``)
      - Validated (Tick)
-     - Not supported
-     - Tick's primary validated base (58/58 hardware suite); vrt49
-       reference design. libdatax has no AD9081 device family (opening it
-       fails with ``ENOTSUP``). Listed because the SDK's Tier 1 contract
-       tests inherit from it.
+     - Not an SDK target (no libdatax device family)
+     - Tick's primary validated base (58/58 hardware suite, see Tick's
+       `mini2 runbook <https://tfcollins.github.io/tick/mini2-hardware-runbook.html>`__);
+       vrt49 reference design. Opening it through libdatax fails with
+       ``ENOTSUP``. Listed because the SDK's Tier 1 contract tests inherit
+       from it.
 
 None of the lab's other boards has a libdatax device family. FMCDAQ3 on
 VCU118 (``nuc``) and ADRV9002 on ZCU102 are vrt49 targets, with rows in

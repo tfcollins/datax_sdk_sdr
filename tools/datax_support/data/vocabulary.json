@@ -112,7 +112,8 @@
   },
   "capability_platforms": [
     "adrv9361-z7035",
-    "adrv9009-zu11eg"
+    "adrv9009-zu11eg",
+    "adrv9009-zc706"
   ],
   "capabilities": {
     "Streaming (immediate)": {

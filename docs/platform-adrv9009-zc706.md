@@ -45,8 +45,9 @@ table, is in libdatax
 ("ADRV9009 on ZC706").
 
 1. **Image.** Kuiper 2023_R2_P1 on the ZC706's SD card. Set up its boot
-   partition from the `zynq-zc706-adv7511-adrv9009` folder (BOOT.BIN, uImage,
-   devicetree.dtb). The board then autoboots from SD on power-on. No custom
+   partition: copy `BOOT.BIN` and `devicetree.dtb` from the
+   `zynq-zc706-adv7511-adrv9009` folder and `uImage` from `zynq-common` to the
+   partition's root. The board then autoboots from SD on power-on. No custom
    bitstream is needed.
 2. **Known-good versions** (from the validating run): PL `hdl_2023_r2`
    (`2156ac7e`), kernel `6.1.70-284114-g2e8908932dfd`, stock iiod
