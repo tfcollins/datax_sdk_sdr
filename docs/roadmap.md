@@ -38,7 +38,7 @@ amended first (REQ-DOC-001).
 
 ## P2 — Streaming MVP
 
-**Status: done (2026-11-05).** libdatax streams (RX/TX, one-shot and cyclic, zero-copy) validated on both labgrid places: `lablp` 10/10 and `tron` 12/12, digital loopback bit-exact on every channel. tron ran an HDL `main` PL, not stock 2023_R2 ({doc}`platform-adrv9009-zu11eg`). On 2026-11-11 libdatax `hw-test.yml` ran green on `tron` through a lab runner, so the ZU11EG rows are *validated*; the Z7035 rows stay *integration artifacts* until `lablp` gets its runner leg (REQ-TEST-041/042).
+**Status: done (2026-11-05).** libdatax streams (RX/TX, one-shot and cyclic, zero-copy) validated on both labgrid places: `lablp` 10/10 and `tron` 12/12, digital loopback bit-exact on every channel. tron ran an HDL `main` PL, not stock 2023_R2 ({doc}`platform-adrv9009-zu11eg`). On 2026-11-11 libdatax `hw-test.yml` ran green on `tron` through a lab runner, so the ZU11EG rows are *validated*. On 2026-11-23 its `kuiper` leg (labgrid boots the catalog Kuiper image) ran green on `lablp` and on the ADRV9009/ZC706 (place `nemo`), so the Z7035 and ZC706 streaming rows are *validated* too (REQ-TEST-041/042).
 
 Stream objects over AXI-DMAC on both boards, stock reference designs.
 Immediate start/stop, RX/TX, cyclic TX, zero-copy paths. The transport is

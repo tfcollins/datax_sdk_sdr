@@ -37,10 +37,10 @@
     "libdatax": {
       "repository": "tfcollins/libdatax",
       "branch": "main",
-      "revision": "e25aca8e16b1797dc28375b36f6b8e3602525626",
+      "revision": "70affce803f1955710a8859f36f9703c66d5b646",
       "path": "support.json",
       "private": false,
-      "why": "main after the first green hw-test.yml on tron (ZU11EG rows validated; Z7035 rows integration-artifacts until a hw-bq runner)"
+      "why": "main after the hw-test.yml kuiper leg: ADRV9009/ZC706 and ADRV9361-Z7035 streaming rows validated (runs 45097585277, 45099566322)"
     }
   }
 }
