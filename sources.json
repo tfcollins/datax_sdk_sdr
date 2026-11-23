@@ -13,10 +13,10 @@
     "vrt49": {
       "repository": "tfcollins/vrt49",
       "branch": "main",
-      "revision": "e5ed5cd9d047f8f8889fd15140578a0b03df45e8",
+      "revision": "74c200e591ffdaba24390a8db90068608b0f9102",
       "path": "support.json",
       "private": true,
-      "why": "main after #75 (AD9081 4x10G note on the vrt-udp-10g row)"
+      "why": "main after #79 (AD9081 4x10G receive path proven on hardware) through #85; clears the #29 drift"
     },
     "libiio": {
       "repository": "tfcollins/libiio",
