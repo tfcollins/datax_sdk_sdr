@@ -17,10 +17,13 @@ functions, not a register playground.
 
 .. admonition:: Status
 
-   **Documentation-first phase.** This site is the architecture proposal,
-   API specification, and requirements definition for the SDK. No SDK code
-   exists yet; every public API appears here before it is implemented
-   (see :doc:`requirements-documentation`).
+   **Specification first, code following.** This site is the architecture
+   proposal, API specification, and requirements definition for the SDK;
+   every public API appears here before it is implemented (see
+   :doc:`requirements-documentation`). The SDK core, ``libdatax``, exists:
+   immediate streaming (P2) is validated on three boards and timed control
+   (P3a) on the ADRV9009-ZU11EG. Timed streams (P3b) and later phases are
+   planned (:doc:`roadmap`).
 
 The gap this fills
 ------------------
@@ -48,35 +51,49 @@ Supported targets
 
    * - Target
      - Infrastructure
-     - SDK API
+     - SDK API (libdatax)
      - Notes
    * - ADRV9009-ZU11EG on ADRV2CRR-FMC (``tron``)
      - **Validated**
-     - Planned
+     - **Validated**: streaming, timed control
      - Tick scheduler and timed Talise FHM hop validated on silicon;
        vrt49 Corundum 10G VITA 49.2 path; hopcap runs the timed hop
-       with hardware-gated capture end to end, nightly. See
-       :doc:`platform-adrv9009-zu11eg` and :doc:`support-matrix`.
-   * - ADRV9361-Z7035 on ADRV1CRR-FMC
+       with hardware-gated capture end to end. libdatax streams and runs
+       timed GPIO, FHM timed tunes, device time and MCS verification.
+       See :doc:`platform-adrv9009-zu11eg`.
+   * - ADRV9361-Z7035 on ADRV1CRR-FMC (``lablp``)
      - Integration artifacts
-     - Planned
+     - **Validated**: streaming
      - vrt49 1G SFP design with the vendored Tick scheduler and a
        fastlock hop controller; control and transport qualified on
-       hardware, RF-measured hop settling unresolved. See
-       :doc:`platform-adrv9361-z7035`.
+       hardware, RF-measured hop settling unresolved. libdatax streams on
+       the stock Kuiper image. See :doc:`platform-adrv9361-z7035`.
+   * - ADRV9009 on ZC706 (``nemo``)
+     - Integration artifacts
+     - **Validated**: streaming
+     - libdatax streams on the stock Kuiper image; Tick's scheduler was
+       validated on it by hand, with no CI. No timed control yet. See
+       :doc:`platform-adrv9009-zc706`.
    * - AD9081-FMCA-EBZ on ZCU102 (``mini2``)
      - Validated (Tick)
-     - Not an SDK target
+     - Not supported
      - Tick's primary validated base (58/58 hardware suite); vrt49
-       reference design. Listed because the SDK's Tier 1 contract
-       tests inherit from it. See :doc:`support-matrix`.
+       reference design. libdatax has no AD9081 device family (opening it
+       fails with ``ENOTSUP``). Listed because the SDK's Tier 1 contract
+       tests inherit from it.
+
+None of the lab's other boards has a libdatax device family. FMCDAQ3 on
+VCU118 (``nuc``) and ADRV9002 on ZCU102 are vrt49 targets, with rows in
+:doc:`support-matrix`. ADRV9371 on ZC706 (``bq``) has no row in any
+repository: only labgrid's own boot check exercises it.
 
 Status vocabulary follows the Tick project: *validated* (end-to-end on
 hardware with evidence artifacts), *integration artifacts* (HDL/DT
 collateral exists, not proven on silicon), *planned* (documented intent).
 *Infrastructure* is what the tick, vrt49, libiio and hopcap repositories
-prove on hardware; *SDK API* is ``libdatax``, which exists on no platform
-yet. The per-repository view is :doc:`support-matrix`.
+prove on hardware; *SDK API* is what ``libdatax`` itself proves on the board
+in its ``hw-test.yml``. Each platform page has a runbook (image, known-good
+versions, how to run the suite, evidence). The per-repository view is :doc:`support-matrix`.
 
 .. toctree::
    :maxdepth: 2
@@ -110,6 +127,7 @@ yet. The per-repository view is :doc:`support-matrix`.
 
    platform-adrv9361-z7035
    platform-adrv9009-zu11eg
+   platform-adrv9009-zc706
    support-matrix
 
 .. toctree::

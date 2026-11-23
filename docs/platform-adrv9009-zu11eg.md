@@ -76,6 +76,38 @@ path, and the hopcap application.
   SDK plans against that driver for the NIC-as-control-plane use; the
   sample path above does not depend on it.
 
+## Runbook
+
+The step-by-step version, with the exact commands and the known-good versions
+table, is in libdatax
+[docs/hardware.md](https://github.com/tfcollins/libdatax/blob/main/docs/hardware.md)
+("ADRV9009-ZU11EG").
+
+1. **Images.** This board does not run a stock Kuiper image for SDK work. It
+   runs one of two boot sets (bitstream, `psu_init.tcl`, kernel `Image`,
+   `system.dtb`) pinned by SHA-256 in libdatax `tests/hardware/images.json`:
+   `stock` (HDL `main` `085a6ed7` PL with the Kuiper 2023_R2 kernel and
+   device tree) for streaming, and `hopcap-sfp` (hopcap `ac07d56`, XSA
+   `6292e762`: Tick, the FHM trigger and the Tick PPS selector) for timed
+   control. The files are kept on the lab runner and JTAG-booted through
+   labgrid. **There is no public download for them yet**, so outside the lab
+   this board cannot be reproduced from these docs alone.
+2. **Known-good versions.** iiod is stock `0.26-5e1e9cb`. The kernel is
+   `6.1.70-284114-g2e8908932dfd` (`stock`) or hopcap's build
+   `6.1.70-g2e8908932dfd-dirty` (`hopcap-sfp`). Host libiio is the pinned v1
+   fork (libdatax `pins.json`).
+3. **Run in the lab.** Dispatch libdatax `hw-test.yml` with `place=tron`. The
+   job boots each image in turn, verifies its hashes, runs the suite and powers
+   the board off.
+4. **Run by hand.** Boot an image, set `DATAX_HW_URI=ip:<board>` and
+   `DATAX_HW_IMAGE=stock` or `hopcap-sfp`, then run
+   `python -m pytest tests/hardware`.
+5. **Expected result.** On `stock`, streaming passes and timed control skips.
+   On `hopcap-sfp`, timed control and RX pass, and TX skips, because TX DMA
+   feeds vrt49's deframer on that image.
+6. **Never reprogram the PL at runtime.** It kills the JESD links; reboot with
+   the other image instead.
+
 ## The release fork (resolved)
 
 Tick's validated base on this board is `hdl_2026_r1` / Vivado 2025.1,
