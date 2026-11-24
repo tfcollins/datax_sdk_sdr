@@ -297,7 +297,8 @@ struct datax_block_info {
 - **Mode latch.** A stream's copying-or-zero-copy mode is fixed by its
   first `recv`/`send`/`get_block`/`put_block` call, even one that fails.
 - **Overflow.** When the converter core reports a DMA overflow, the next RX
-  block is marked `discontinuous`. Over GigE this is the normal case at
+  block is marked `discontinuous`. Streams started with `start_at` differ:
+  see "After an overflow" under `timestamp_ticks`. Over GigE this is the normal case at
   native rates. Where the core's status cannot be read, `discontinuous` is
   always false and `datax doctor` says detection is unavailable.
 - **`timestamp_ticks`** (planned P3b; until then it is 0 and `start_at()`
@@ -316,9 +317,22 @@ struct datax_block_info {
   - **Later blocks are derived:** `T + round(samples_since_release ×
     tick_hz / sample_rate)`. These are exact only at the device rate;
     the rounding is the caller's to allow for.
-  - **After an overflow** every block reads `timestamp_ticks = 0`
-    ("unknown") with `discontinuous` set, until the next `start_at`
-    re-anchors.
+  - **After an overflow.** The `block_count` blocks enqueued before T are
+    filled back to back from the release, so they keep their timestamps
+    and are not marked `discontinuous`.
+    - An overflow detected while those blocks are dequeued is attributed
+      to block `block_count`, the first block re-armed after the release.
+    - From that block on, every block reads `timestamp_ticks = 0`
+      ("unknown") with `discontinuous` set, until the next `start_at`
+      re-anchors.
+    - A bandwidth gap inside the pre-T blocks is therefore reported only
+      from block `block_count`.
+    - A lost block (a failed read on the network path) marks the
+      stream's timestamps unknown at once.
+  - **Ring depth.** The rule above assumes the server's kernel ring holds
+    the stream's `block_count` blocks. A network context's iiod (v0,
+    Kuiper) keeps 4, so a timed RX `start_at` over the network with
+    `block_count > 4` returns `-EINVAL`.
   - A stream started with `start()` is untagged: always 0.
   - `DATAX_CAP_TIMESTAMPS` means exactly "block 0 of each release is
     hardware-stamped".
