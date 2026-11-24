@@ -153,7 +153,7 @@ STAGES = [
   "Spec decisions 2, 3, 6, 7 and 8.",
   [("tick", "P3b S2: tick_dma_gate RTL (pass = !mode | level) with tests", "P1", "Todo", "REQ-TEST-022",
     "Gates 0 and 1 are the RX and TX level, 2 and 3 the RX and TX timed mode. The reset state is forced open. Two-flop CDC into the device clock. "
-    "RX holds `adc_valid` low in front of cpack. TX holds the upack read enable low and drives zeros. iverilog tests in tick's style."),
+    "RX re-routes only cpack's `fifo_wr_en` pin and adds `pack_reset` on cpack's reset pin. TX holds reads until the first opening, then mutes. OPEN_DELAY is 12. Start from the G2/G3 prototype on `p3b-spike-gate`. iverilog tests in tick's style."),
    ("tick", "P3b S2: tick_fifo_tag_adapter (FIFO interface to tagger AXIS, oneshot per release) with tests", "P1", "Todo", "REQ-TEST-022",
     "Presents cpack's `packed_fifo_wr` to `tick_stream_timestamp_tag` with tready = 1 and a synthetic tlast while RX mode is 0, so the tagger re-arms for each start_at. "
     "Tests against the Python codec."),
@@ -178,7 +178,7 @@ STAGES = [
     "stop() flushes the arm and forces the gate open. Untimed start() forces it open first."),
    ("libdatax", "P3b S3: datax_sched_queue_stream_gate and gated bursts", "P1", "Todo", "REQ-TEST-022",
     "Level bit only. Needs a stream started with start_at, otherwise -EINVAL. TX only on this image: RX returns -ENOTSUP, because G6 failed and RX gating moved to tfcollins/datax_sdk_sdr#39. "
-    "While the TX gate is closed the DAC outputs zero and cyclic playback pauses. Python `gate_on`/`gate_off`."),
+    "While the TX gate is closed it mutes: the DAC outputs zero and the cyclic buffer keeps playing, time-aligned (G2). Python `gate_on`/`gate_off`."),
    ("libdatax", "P3b S3: RX block timestamps (header parse and strip, derived, discontinuity)", "P1", "Todo", "REQ-TEST-022",
     "Block 0 carries capture_tick, applies the epoch offset, strips 32 bytes and reduces valid_samples. "
     "Later blocks get derived timestamps. After an overflow, blocks read 0 with discontinuous set until the next start_at. Python BlockInfo.timestamp_ticks is 0 when unknown, as in C."),
