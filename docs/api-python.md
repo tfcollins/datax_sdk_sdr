@@ -178,7 +178,7 @@ mutes: the cyclic buffer keeps playing, time-aligned.
 try:
     rx.start_at(dev.time.now)                 # inside the guard margin
 except datax.LateError as e:
-    print(e.requested, e.margin)              # explicit, never a shifted capture
+    print(e.errno, e.message)                 # ETIME; the message names the guard margin. Never a shifted capture
 ```
 
 `LateError` is also raised by a later `recv()`/`send()` when the opening

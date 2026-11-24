@@ -546,4 +546,8 @@ and completions). One exception: when the device has no scheduler,
 `DATAX_EVT_PPS_LOCK_CHANGE` from `set_time_next_pps` or `get_time` fires
 synchronously on the calling thread, inside that call. Destroying the
 scheduler or the context from a callback is ignored (both calls return
-`void`); destroy them from another thread.
+`void`); destroy them from another thread. The same holds for streams. On the poller thread
+`datax_stream_stop()` returns `-EDEADLK` with a last error.
+`datax_stream_destroy()` is refused: it returns `void` and leaves the
+stream valid, so the caller must destroy it again from another thread or
+it leaks. Freeing there could run a pending hook on freed memory.
