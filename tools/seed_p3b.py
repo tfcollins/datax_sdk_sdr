@@ -27,7 +27,12 @@ def find_issue(repo, title):
 def ensure_issue(repo, title, body):
     n = find_issue(repo, title)
     if n:
-        print(f"  exists {repo}#{n} {title}")
+        cur = json.loads(gh("issue", "view", str(n), "-R", f"{OWNER}/{repo}", "--json", "body"))["body"]
+        if cur.strip() != body.strip() and not DRY:
+            gh("issue", "edit", str(n), "-R", f"{OWNER}/{repo}", "--body-file", "-", inp=body)
+            print(f"  updated {repo}#{n} {title}")
+        else:
+            print(f"  exists {repo}#{n} {title}")
         return n
     if DRY:
         print(f"  DRY create {repo}: {title}")
@@ -170,17 +175,17 @@ STAGES = [
     "Guard-margin rejection, then execute-now close, then buffer arm, then open at T with LATE_DROP. A late arm fails the stream. "
     "stop() flushes the arm and forces the gate open. Untimed start() forces it open first."),
    ("libdatax", "P3b S3: datax_sched_queue_stream_gate and gated bursts", "P1", "Todo", "REQ-TEST-022",
-    "Level bit only. Needs a stream started with start_at, otherwise -EINVAL. TX only on this image: RX returns -ENOTSUP unless G6 brings the AXIS route in. "
+    "Level bit only. Needs a stream started with start_at, otherwise -EINVAL. TX only on this image: RX returns -ENOTSUP, because G6 failed and RX gating moved to tfcollins/datax_sdk_sdr#39. "
     "While the TX gate is closed the DAC outputs zero and cyclic playback pauses. Python `gate_on`/`gate_off`."),
    ("libdatax", "P3b S3: RX block timestamps (header parse and strip, derived, discontinuity)", "P1", "Todo", "REQ-TEST-022",
     "Block 0 carries capture_tick, applies the epoch offset, strips 32 bytes and reduces valid_samples. "
-    "Later blocks get derived timestamps. After an overflow, blocks read 0 with discontinuous set until the next start_at. Python BlockInfo.timestamp is None when unknown."),
+    "Later blocks get derived timestamps. After an overflow, blocks read 0 with discontinuous set until the next start_at. Python BlockInfo.timestamp_ticks is 0 when unknown, as in C."),
    ("libdatax", "P3b S3: capability probe for RX_ARM, TX_ARM, STREAM_GATE, TIMESTAMPS and chip-B FHM", "P2", "Todo", "REQ-TEST-042",
     "Probe from `stream_gate_map`, the Tick bitmap (0x08, 0x40) and the `capture_tag_*` attributes. Every flag stays false without the map, so the hopcap-sfp image does not regress."),
    ("libdatax", "P3b S3: chip-B timed tunes (an FHM pipeline per chip)", "P2", "Todo", "",
     "`queue_tune` on channels 2 and 3 emits on Tick GPIO bit 1, with independent one-ahead staging per chip. A hop on one chip clears PHASE_COHERENT."),
    ("libdatax", "P3b S3: Python start_at, recv timestamps, gate_on/gate_off, LateError", "P2", "Todo", "",
-    "Follows the amended `api-python.md`: `recv()` keeps returning (samples, BlockInfo), with BlockInfo.timestamp None when unknown.")]),
+    "Follows the amended `api-python.md`: `recv()` keeps returning (samples, BlockInfo), with BlockInfo.timestamp_ticks 0 when unknown, as in C.")]),
  ("S4", "P3b S4 — hardware suite on tron", "Blocked-lab", "Todo", "REQ-TEST-022, REQ-TEST-023, REQ-TEST-024",
   "Needs `tron`, which has been off the network since 2026-11-23 and needs a bench check. Spec decision 10.",
   [("libdatax", "P3b S4: timed-dma entry in images.json, tron-run.sh and the hw-test.yml image option", "P1", "Todo", "REQ-TEST-024",
