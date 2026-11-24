@@ -60,8 +60,9 @@ the external input) and MCS verification. Hardware-proven on `tron`; the
 matrix rows are *validated* by libdatax `hw-test.yml` (first green run
 2026-11-11, REQ-TEST-041/042). `PHASE_COHERENT` stays false: the device tree has
 no RF PLL phase sync. **P3b** adds the HDL for timed DMA streams on this board
-(a gated `data_offload` on RX and TX driven by Tick's `CAPTURE_ARM` and
-`TRANSMIT_ARM`, the timestamp tagger, a chip-B FHM trigger) and then
+(a fabric gate on the RX and TX DMA paths driven by Tick's `STREAM_GATE`
+level, not a `data_offload`; a oneshot timestamp tagger on RX block 0; a
+chip-B FHM trigger) and then
 `stream_start_at`, stream gating and DMA timestamps; REQ-TEST-022's timed-capture
 and gated-burst items move there. Open for either half: REQ-TEST-031 settle and
 REQ-TEST-032 phase-coherence measurements need RF cabling on `tron`.

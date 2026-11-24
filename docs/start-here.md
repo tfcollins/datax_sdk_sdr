@@ -116,7 +116,7 @@ What this SDK is being designed to let you write:
 dev.time.align_next_pps(epoch=0)            # device time = 0 at PPS
 with dev.rx_stream(channels=[0]) as rx:
     rx.start_at(dev.time.seconds(1.0))      # hardware-exact start
-    samples, ts = rx.recv()                 # ts = first-sample time
+    samples, info = rx.recv()               # info.timestamp_ticks = first-sample time
 ```
 
 Abridged from the worked examples in {doc}`api-python` — the design

@@ -234,9 +234,9 @@ int datax_stream_get_block(struct datax_stream *stream, void **data,
 int datax_stream_put_block(struct datax_stream *stream, void *data);
 
 struct datax_block_info {
-    unsigned long long timestamp_ticks; /* first-sample time; 0 if untagged */
+    unsigned long long timestamp_ticks; /* first-sample time; 0 = unknown */
     bool discontinuous;                 /* overflow occurred before this block */
-    size_t valid_samples;
+    size_t valid_samples;               /* reduced by the stripped tag, block 0 */
 };
 ```
 
@@ -300,25 +300,76 @@ struct datax_block_info {
   block is marked `discontinuous`. Over GigE this is the normal case at
   native rates. Where the core's status cannot be read, `discontinuous` is
   always false and `datax doctor` says detection is unavailable.
-- `timestamp_ticks` is 0 until the tagger arrives with the timed path (P3).
-  Until then `start_at()` returns `-ENOTSUP`.
+- **`timestamp_ticks`** (planned P3b; until then it is 0 and `start_at()`
+  returns `-ENOTSUP`):
+  - **Block 0 of each release is hardware-stamped.** The release is the
+    opening of a `start_at`. libdatax checks the tag's magic and flags,
+    strips the 32-byte header (4 frames at 2 channels, 2 frames at 4
+    channels) and reduces `valid_samples` by that count. The overwritten
+    samples are lost, not shifted. `timestamp_ticks` is the device time
+    of the opening command, in API ticks.
+  - **Later blocks are derived:** `T + round(samples_since_release ×
+    tick_hz / sample_rate)`. These are exact only at the device rate;
+    the rounding is the caller's to allow for.
+  - **After an overflow** every block reads `timestamp_ticks = 0`
+    ("unknown") with `discontinuous` set, until the next `start_at`
+    re-anchors.
+  - A stream started with `start()` is untagged: always 0.
+  - `DATAX_CAP_TIMESTAMPS` means exactly "block 0 of each release is
+    hardware-stamped".
 
-### Arm semantics (the timed-start contract)
+### Timed start and stream gating (planned P3b)
 
-`start_at(T)` is implemented as *arm early, release exactly* — the
-`data_offload` block holds the armed DMA until a Tick
-`CAPTURE_ARM`/`TRANSMIT_ARM` pulses its `sync_ext` input at T
-({doc}`streaming-model`). Contractual consequences:
+*Planned P3b behaviour; the symbols exist and return `-ENOTSUP` until the
+platform's timed-stream hardware does.* The mechanism is per board
+({doc}`streaming-model`): on the ZU11EG a Tick `STREAM_GATE` level drives
+a fabric gate beside the DMA; on the AD9081 a `data_offload` is armed and
+released. The contract below is the same for both.
 
-- all buffers are enqueued and the DMA started **before** T; `start_at`
-  fails with `DATAX_ERR_LATE` if T is closer than the guard margin
-  (queryable via caps; default 10 ms);
-- if the arm descriptor is late at dispatch, the stream errors loudly
-  (event + failed start), never a shifted capture;
-- `stop()` on an armed-but-unreleased stream cancels the arm and flushes
-  the descriptor;
-- the first sample of a released RX stream carries timestamp T when the
-  tagger is fitted (`DATAX_CAP_TIMESTAMPS`).
+**`datax_stream_start_at(stream, T)`** — the first RX sample, or the first
+TX sample on the DAC, is the sample at device time T.
+
+- *Sequence:* close the gate, arm the DMA, open at T. All buffers are
+  enqueued (RX) or loaded (TX: every block for streaming TX, the one
+  buffer for cyclic TX) **before** T. The stream is `started` at once;
+  `recv` blocks until data arrives.
+- *Guard margin:* T closer than the guard margin (queryable via caps;
+  default 10 ms) returns `DATAX_ERR_LATE` from `start_at`. The execute-now
+  setup commands are exempt from the margin.
+- *Late at dispatch:* if the opening command is late when Tick dispatches
+  it, `DATAX_EVT_LATE_COMMAND` is raised, the stream is marked failed and
+  `recv`/`send` return `DATAX_ERR_LATE`. The capture never starts shifted.
+- *`stop()` on an armed stream* flushes the pending opening command and
+  forces the gate open (the reset state), then tears down as usual. A
+  later `start()` therefore finds the gate open; a later `start_at`
+  repeats the sequence. `start()` also forces the gate open first, so a
+  crashed earlier process cannot leave it closed.
+- *Latency:* the gate opens a fixed CDC latency after tick T, plus or
+  minus one device clock (the tick and device clocks are asynchronous).
+- *Errors:* `-ENOTSUP` without `DATAX_CAP_RX_ARM` / `DATAX_CAP_TX_ARM` for
+  the direction; `-EALREADY` on a started stream.
+- *TX:* non-cyclic TX over a network context cannot feed native rates and
+  underflows (`DATAX_EVT_STREAM_UNDERFLOW`) after the preloaded blocks
+  drain; cyclic TX preloads one buffer and does not.
+
+**`datax_sched_queue_stream_gate(sched, when, stream, enable)`** — gate a
+running stream on or off on a tick boundary.
+
+- The stream must have been started with `start_at`; otherwise it returns
+  `-EINVAL` ("stream is not in timed mode; use start_at"), because an
+  untimed stream ignores the level.
+- Requires `DATAX_CAP_STREAM_GATE`, else `-ENOTSUP`. The usual guard
+  margin and late rules of the scheduler apply.
+- **TX gating** (supported on the ZU11EG): a burst is `gate(t1, true)`
+  then `gate(t2, false)`. While closed the DAC outputs zero and the TX
+  FIFO is not read, so a cyclic buffer resumes where it paused.
+- **RX mid-stream gating returns `-ENOTSUP` on the ZU11EG** ("RX gating
+  needs a DMA with end-of-burst (tlast) on this image"): the RX DMA has
+  no end-of-burst, so a closing gate cannot end a block, and later
+  timestamps would be wrong. RX opens once per `start_at` and closes only
+  at `stop`. Platforms with an end-of-burst DMA may allow it, with one
+  tagged block per opening. The platform page states the per-board
+  position.
 
 ## Scheduler
 
@@ -398,7 +449,8 @@ struct datax_completion {
   hops, `queue_gpio` refuses a mask that touches that line (`-EINVAL`);
   only `queue_tune` drives it.
 - `queue_stream_gate` and `stream_start_at` return `-ENOTSUP` until a
-  platform's timed-stream hardware exists (ZU11EG: P3b).
+  platform's timed-stream hardware exists (ZU11EG: P3b); see "Timed
+  start and stream gating" above.
 
 ### Abstracting the Tick submission bottleneck
 

@@ -95,10 +95,10 @@ What vrt49 does not yet provide:
 
 1. RF-measured fastlock settle (REQ-TEST-031) with scope or spectrum
    evidence.
-2. `tick_stream_timestamp_tag` and `CAPTURE_ARM`/`TRANSMIT_ARM` wiring
-   to the `data_offload` `sync_ext` inputs, so the DMA path has the
-   same `RX_ARM`/`TX_ARM`/`STREAM_GATE`/`TIMESTAMPS` semantics as the
-   ZU11EG — or a decision that the VRT framer path is the SDK's
+2. `tick_stream_timestamp_tag` and a Tick-driven DMA gate (the ZU11EG's
+   P3b mechanism; `data_offload` `sync_ext` only where the design has one),
+   so the DMA path has the same `RX_ARM`/`TX_ARM`/`STREAM_GATE`/`TIMESTAMPS`
+   semantics as the ZU11EG — or a decision that the VRT framer path is the SDK's
    streaming path on this board.
 3. An external PPS route for `pps_in`.
 4. The runbook (REQ-DOC-004).

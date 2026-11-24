@@ -125,8 +125,10 @@ and the scheduler-triggered Talise FHM hop are passed; the evidence is
 linked above and summarised in {doc}`support-matrix`. Timed capture
 with tick-exact timestamps exists only on the VRT path (hopcap's
 timestamps come from the vrt49 framer, not from a Tick tagger on the
-DMA path). What remains: the DMA-path tagger and `sync_ext` wiring if
-the SDK keeps a DMA streaming path on this board, the scope-evidence
+DMA path). What remains: the P3b DMA gate (Tick `STREAM_GATE` driving a
+fabric gate in front of `util_cpack` and after `axi_tx_fifo`) and the
+oneshot tagger on RX block 0, if the SDK keeps a DMA streaming path on
+this board, the scope-evidence
 staircase against PPS (REQ-TEST-023) that Tick's `tron` suite does not
 yet produce. Exposing the scheduler, FHM hops, PPS time and MCS
 through `libdatax` is done (P3a); the DMA-path pieces are P3b
@@ -164,7 +166,7 @@ variant + coexistence); `NET_OFFLOAD_SAMPLES` at P6. `FASTLOCK_HOP` is
 n/a (no AD936x). Infrastructure status per row is in
 {doc}`support-matrix`: `TIMED_COMMANDS` and `FHM_HOP` are validated;
 `STREAM_GATE` and `TIMESTAMPS` are validated on the VRT path through
-hopcap; `RX_ARM`/`TX_ARM` on the DMA path, `MCS` and `PHASE_COHERENT`
+hopcap; `RX_ARM`/`TX_ARM` on the DMA path (P3b plans the DMA gate; no `data_offload`), `MCS` and `PHASE_COHERENT`
 have no infrastructure row yet. libdatax P3a adds `timed-gpio`,
 `fhm-hop`, `sdk-timed` and `mcs` rows for this board (validated by
 `hw-test.yml`); `MCS` is verification only and `PHASE_COHERENT` is

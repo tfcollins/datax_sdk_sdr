@@ -120,8 +120,8 @@ layer with three tiers:
    descriptors and manages completions ({doc}`api-c-core`).
 3. **Capability discovery** — a compiled per-platform capability table,
    refined at `datax_context` creation by probing the live IIO context
-   (is a Tick device present? a `data_offload` with `sync_ext`? an
-   `mqnic`?). Applications branch on flags, never on board names.
+   (is a Tick device present? a Tick `stream_gate_map` or a
+   `data_offload` with `sync_ext`? an `mqnic`?). Applications branch on flags, never on board names.
 
 ## Data Plane (MVP)
 
@@ -130,10 +130,11 @@ layer ↔ pack/unpack ↔ `data_offload` ↔ `axi_dmac` ↔ IIO buffer. The SDK
 adds two things on top (detailed in {doc}`streaming-model`):
 
 - **Timed start** — `datax_stream_start_at(t)` pre-arms the buffer and
-  schedules a Tick `CAPTURE_ARM`/`TRANSMIT_ARM`, which releases the
-  armed `data_offload` via its `sync_ext` input at tick T. (The
-  `axi_dmac` itself has no trigger input — arming semantics are the
-  contract, and they are stated explicitly in the API.)
+  opens a closed fabric gate at tick T: on the ZU11EG a Tick
+  `STREAM_GATE` level drives a gate beside the DMA; on the AD9081 a Tick
+  `CAPTURE_ARM`/`TRANSMIT_ARM` releases an armed `data_offload` via its
+  `sync_ext` input. (The `axi_dmac` itself has no trigger input — arming
+  semantics are the contract, and they are stated explicitly in the API.)
 - **In-band timestamps** — the Tick stream tagger prepends a device-time
   header to capture buffers, so received blocks carry their capture time.
 

@@ -36,8 +36,10 @@ object wraps the libiio buffer API:
 - **TX** — one-shot blocks or cyclic mode (waveform repeats from fabric
   memory without host involvement — the stock ADI cyclic-buffer path).
 - **In-band timestamps** — when the design includes
-  `tick_stream_timestamp_tag`, each capture carries a device-time header;
-  the SDK strips it and delivers `{samples, timestamp}`.
+  `tick_stream_timestamp_tag`, block 0 of each timed release carries a
+  device-time header; the SDK strips it, reduces `valid_samples` by the
+  overwritten samples and delivers `{samples, timestamp}`. Later blocks
+  are derived from block 0 (see {doc}`api-c-core`).
 
 Expected sustained rates (estimates, to be replaced by measured numbers
 per {doc}`requirements-test` evidence):
@@ -50,33 +52,78 @@ per {doc}`requirements-test` evidence):
 The gap between native and sustained rates is exactly why the offload
 roadmap exists.
 
-## Timed start: arm/release semantics
+## Timed start: per-board mechanism
 
-The `axi_dmac` has **no trigger input**. Timed capture and transmit work
-by *arming early and releasing exactly*:
+The `axi_dmac` has **no trigger input**, so a timed start is always some
+fabric element in front of (RX) or behind (TX) the DMA that is closed
+while the DMA is armed and opened exactly at tick T. The element differs
+per board. *This section describes planned P3b behaviour; until it ships,
+`datax_stream_start_at()` returns `-ENOTSUP`.*
 
-1. the SDK enqueues and starts the DMA transfer — samples do not flow yet
-   because the `data_offload` block in front of it holds;
-2. a Tick `CAPTURE_ARM` / `TRANSMIT_ARM` descriptor, queued for tick T,
-   pulses the offload's `sync_ext` input at T;
-3. the offload releases, and the first sample through carries device time
-   T (tagged in-band when the tagger is present).
+| Board | RX mechanism | TX mechanism |
+|---|---|---|
+| ADRV9009-ZU11EG | Tick `STREAM_GATE` level drives a fabric gate between the TPL outputs and `util_cpack`; a oneshot tagger on RX block 0 | the same level drives a gate after `axi_tx_fifo` (before `util_upack` and the DAC TPL) |
+| AD9081 (ZCU102) | `data_offload` armed, released by a Tick `CAPTURE_ARM` pulse on `sync_ext` | `data_offload` armed by `TRANSMIT_ARM` |
+
+No ADRV9009 design has a `data_offload`, and on RX it is a bounded burst
+store that cannot start a continuous stream at T and keep it running. The
+ZU11EG therefore uses the gate; the arm commands are not used on that
+board.
+
+### ZU11EG: STREAM_GATE and the DMA gate
+
+Tick's `STREAM_GATE` command sets or clears a latched level bit. Two such
+bits per direction drive one fabric gate (`tick_dma_gate`): a **level**
+(1 = pass) and a **mode** bit (0 = forced open, the reset state).
+`pass = !mode | level`, evaluated in the device clock after a two-flop
+clock-domain crossing.
+
+- **Reset is open.** With every bit at 0 the image streams exactly like
+  the stock design, so an untimed client (iio-oscilloscope, pyadi-iio, a
+  P2-era libdatax) sees no difference.
+- **RX gate.** While closed it holds every channel's valid low on the
+  same clock edge, so `util_cpack`'s alignment is untouched. Samples
+  during a closed gate are discarded in fabric; that is not an overflow.
+- **TX gate.** While closed it stops reading the TX FIFO and drives zeros
+  to the DAC (mid-scale). On reopening, the next sample read is the next
+  sample in the FIFO, so a cyclic buffer resumes where it paused.
+- **Tagger.** Tick's `tick_stream_timestamp_tag`, in oneshot mode behind a
+  FIFO-interface adapter, overwrites the first 32 bytes of RX block 0 of
+  each release with a header carrying the tick latched when the opening
+  `STREAM_GATE` executed (T, for an on-time command).
+
+**Latency bound.** The tick clock (100 MHz) and the device clock are
+asynchronous, so the gate opens at a fixed CDC latency, plus or minus one
+device clock, after tick T. The bound is measured on `tron` before the
+capability flips.
+
+### Start sequence
+
+`start_at(T)` is "close, arm the DMA, open at T":
+
+1. write execute-now commands that set the direction's mode bit and clear
+   its level (exempt from the guard margin) and wait for their completions;
+2. open the IIO buffer and enqueue every RX block, or load the TX data;
+3. commit the opening `STREAM_GATE` at T, late-drop, with a completion.
+
+The stream is `started` at once; `recv` blocks until data arrives.
 
 ```{mermaid}
 sequenceDiagram
     participant App
     participant SDK as libdatax
     participant Drv as Tick IIO driver
-    participant OFFL as data_offload
+    participant GATE as DMA gate (fabric)
     participant DMA as axi_dmac
 
     App->>SDK: stream_start_at(T)
+    SDK->>Drv: execute-now STREAM_GATE: mode=1, level=0
     SDK->>DMA: enqueue + start buffers (pre-arm)
-    SDK->>Drv: batched descriptor writes (CAPTURE_ARM @ T)
-    Note over OFFL: holds — no samples flow
-    Drv-->>OFFL: sync_ext pulse at tick T (fabric)
-    OFFL->>DMA: samples flow, first sample = T
-    DMA-->>SDK: filled block via IIO buffer
+    SDK->>Drv: STREAM_GATE level=1 @ T
+    Note over GATE: closed — no samples reach the DMA
+    Drv-->>GATE: level rises at tick T (fabric)
+    GATE->>DMA: samples flow, first sample = T (+ fixed CDC latency, ±1 device clock)
+    DMA-->>SDK: block 0 carries the 32-byte tag
     SDK-->>App: recv() → {samples, timestamp T}
 ```
 
@@ -84,26 +131,29 @@ The contract, stated bluntly in the API docs:
 
 - buffers **must** be armed before T; the SDK enforces a configurable
   guard margin and reports `DATAX_ERR_LATE` if T is inside it;
-- if the arm descriptor goes late in the queue (Tick's late detection),
-  the stream start fails loudly through the completion path — never a
-  silently-shifted capture;
-- an armed-but-never-released offload (T unreachable, e.g. time
-  realigned) must be cancelable: `datax_stream_stop()` tears down the
-  arm and flushes the descriptor.
+- if the opening command is late at dispatch (Tick's late detection), the
+  stream is marked failed and `recv`/`send` return `DATAX_ERR_LATE` — never
+  a silently-shifted capture;
+- an armed-but-never-opened stream (T unreachable, e.g. time realigned)
+  must be cancelable: `datax_stream_stop()` flushes the pending opening
+  command and forces the gate open (mode 0), so a later untimed `start()`
+  finds it open.
 
 Failure modes and their surfaced errors:
 
 | Failure | Surface |
 |---|---|
-| T already past at submit | `DATAX_ERR_LATE` from `stream_start_at` |
-| Arm descriptor late at dispatch | `DATAX_EVT_LATE_COMMAND` + stream start error |
-| Offload FIFO overflow before release (RX) | `DATAX_EVT_OVERFLOW`, block marked discontinuous |
+| T already past or inside the guard margin at submit | `DATAX_ERR_LATE` from `stream_start_at` |
+| Opening command late at dispatch | `DATAX_EVT_LATE_COMMAND`; stream failed; `DATAX_ERR_LATE` from `recv`/`send` |
+| DMA overflow (RX) | `DATAX_EVT_STREAM_OVERFLOW`; block marked discontinuous; timestamps read 0 until the next `start_at` |
+| TX underflow | `DATAX_EVT_STREAM_UNDERFLOW` |
 | Host too slow draining (RX) | standard IIO overflow accounting, surfaced per-block |
 
 ## Gated streaming
 
 `STREAM_GATE` descriptors latch a fabric enable on tick boundaries. The
-SDK exposes this as schedulable gate windows on a running stream —
+SDK exposes this as schedulable gate windows on a running stream that was
+started with `start_at` —
 `sched.at(t1).gate_on(stream)`, `.at(t2).gate_off(stream)` — the building
 block for TDD frames and burst duty cycles. `TDD_SYNC` alignment of an
 `axi_tdd` instance (where fitted) rides the same mechanism.

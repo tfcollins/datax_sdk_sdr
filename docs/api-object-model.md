@@ -105,29 +105,41 @@ because that is the phase-coherent unit the application reasons about
   this deliberately diverges from UHD's silent-late behavior
   ({doc}`background-prior-art`).
 - Stream data errors (overflow, underflow, discontinuity) are delivered
-  per-block, not as global state.
+  per-block, not as global state: `DATAX_EVT_STREAM_OVERFLOW` and
+  `DATAX_EVT_STREAM_UNDERFLOW` are the events, and a block after an
+  overflow is marked `discontinuous`.
 
 ## Capability discovery
 
 A `datax_caps` object is a set of flags plus numeric limits, built from a
 compiled per-platform table refined by probing the live IIO context at
-startup (Tick device present? `data_offload` with `sync_ext`? `mqnic`
-netdev? tagger in the datapath?).
+startup (Tick device present? Tick's `stream_gate_map` attribute and
+capability bitmap? `data_offload` with `sync_ext` on AD9081? `mqnic`
+netdev? tagger in the datapath?). The timed-stream flags are probed from
+the image, never from a board table.
 
 Flags in v1:
 
 | Flag | Meaning |
 |---|---|
 | `DATAX_CAP_TIMED_COMMANDS` | Tick scheduler present; `sched` object available |
-| `DATAX_CAP_RX_ARM` / `DATAX_CAP_TX_ARM` | Timed stream start via arm/release |
-| `DATAX_CAP_STREAM_GATE` | Hard-timed gating of running streams |
-| `DATAX_CAP_TIMESTAMPS` | In-band capture timestamps (stream tagger) |
+| `DATAX_CAP_RX_ARM` / `DATAX_CAP_TX_ARM` | Timed start of that direction (`start_at`): Tick's `stream_gate_map` names the direction's level and mode bits and the capability bitmap has `STREAM_GATE_TARGET` (0x08), with the scheduler working |
+| `DATAX_CAP_STREAM_GATE` | Hard-timed gating of running streams: `RX_ARM` or `TX_ARM`. RX mid-stream gating is still `-ENOTSUP` on the ZU11EG; TX gating is supported |
+| `DATAX_CAP_TIMESTAMPS` | Block 0 of each release is hardware-stamped in-band: the bitmap has `STREAM_TIMESTAMP` (0x40), the `capture_tag_*` attributes exist and the map names the RX gate. Later blocks are derived |
 | `DATAX_CAP_FASTLOCK_HOP` | Pre-staged tuning via AD936x fastlock |
 | `DATAX_CAP_FHM_HOP` | Pre-staged tuning via ADRV9009 Talise FHM |
 | `DATAX_CAP_MCS` | Multi-chip sync; `run_mcs()` supported |
 | `DATAX_CAP_PHASE_COHERENT` | *Current* coherence state (false until MCS runs) |
 | `DATAX_CAP_NET_OFFLOAD_NIC` | Corundum NIC fitted (control/telemetry plane) |
 | `DATAX_CAP_NET_OFFLOAD_SAMPLES` | RF-sample offload path (roadmap; always false in v1) |
+
+The Tick driver's read-only `stream_gate_map` attribute is populated from
+a device-tree property on the Tick node (for example `adi,stream-gate-map
+= "rx-dma", "tx-dma", "rx-mode", "tx-mode"`; exact spelling is the
+driver's). Absent means no gate is wired and every timed-stream flag is
+false. A second `"fhm-b"` entry is what turns on `FHM_HOP` for channels
+2-3; until then they keep `-ENOTSUP`. Images without a map (hopcap's
+`sfp` image) keep every flag false.
 
 Limits carried alongside: hop-table depth (8 fastlock profiles / FHM
 table size), scheduler queue depth, tick rate, guard margin, max
@@ -142,11 +154,11 @@ Capabilities by platform *and phase* — the phase gates are defined in the
 |---|---|---|---|
 | Streaming (immediate) | P2 — done (validated 2026-11-23) | P2 — done (validated 2026-11-11) | P2 — done (validated 2026-11-23) |
 | `TIMED_COMMANDS` | P4 — Tick in vrt49's 1G SFP design, RF settle open | P3a — done 2026-11-06 (libdatax on Tick) | no phase (no Tick in the stock PL) |
-| `RX_ARM` / `TX_ARM` | P4 | P3b — needs a gated `data_offload` | no phase |
-| `STREAM_GATE` | P4 | P3b (DMA path) | no phase |
-| `TIMESTAMPS` | P4 | P3b (DMA-path tagger) | no phase |
+| `RX_ARM` / `TX_ARM` | P4 | P3b — DMA gate (Tick `STREAM_GATE` level), not `data_offload` | no phase |
+| `STREAM_GATE` | P4 | P3b (DMA gate; TX gating, RX start-only) | no phase |
+| `TIMESTAMPS` | P4 | P3b (oneshot tagger on RX block 0 of each release) | no phase |
 | `FASTLOCK_HOP` | P4 | — (n/a) | — (n/a) |
-| `FHM_HOP` | — (n/a) | P3a — done, chip A (chip B trigger in P3b) | no phase (needs Tick and the FHM trigger) |
+| `FHM_HOP` | — (n/a) | P3a — done, chip A (chip B in P3b, once the map names it) | no phase (needs Tick and the FHM trigger) |
 | `MCS` | — (single chip) | P3a — done, verification of the boot-time sequence | — (single chip) |
 | `PHASE_COHERENT` | — | false until the device tree enables RF PLL phase sync | — (single chip) |
 | `NET_OFFLOAD_NIC` | P5 — 1G SFP shipped; 10G GTX wrapper (highest-risk) | P5 — vrt49 Corundum design validated | no phase |

@@ -100,8 +100,9 @@ with datax.Context("ip:analog.local") as ctx:
     dev.time.align_next_pps(epoch=0)          # device time = 0 at PPS edge
     with dev.rx_stream(channels=[0], block_samples=65536) as rx:
         rx.start_at(dev.time.seconds(1.0))    # exactly 1 s after the edge
-        samples, ts = rx.recv()
-        assert ts == dev.time.seconds(1.0)    # first sample is tick-exact
+        samples, info = rx.recv()             # (samples, BlockInfo)
+        # block 0 of a start_at release is hardware-stamped
+        assert info.timestamp_ticks == dev.time.seconds(1.0)
 ```
 
 ### Phase-coherent dual-chip capture (ADRV9009-ZU11EG)
@@ -117,7 +118,7 @@ with datax.Context("ip:zu11eg.local") as ctx:
 
     with dev.rx_stream(channels=[0, 1, 2, 3]) as rx:   # spans both chips
         rx.start_at(dev.time.now + dev.time.seconds(0.1))
-        samples, ts = rx.recv()               # (4, N) complex64, one timestamp
+        samples, info = rx.recv()             # (4, N) complex64, one BlockInfo
 ```
 
 ### Frequency-hop scan (ADRV9361-Z7035, fastlock)
@@ -139,6 +140,35 @@ with datax.Context("ip:z7035.local") as ctx:
     sched.wait_all()                          # every hop confirmed on time
 ```
 
+### Timed start, timestamps and gating (planned P3b)
+
+`rx.start_at(t)` / `tx.start_at(t)` take device time. `recv()` keeps
+returning `(samples, BlockInfo)`; `BlockInfo` carries `timestamp_ticks`,
+`discontinuous` and `valid_samples`, mirroring `datax_block_info`.
+`timestamp_ticks` is 0 when the time is unknown: an untimed stream, or any
+block after an overflow until the next `start_at`. Block 0 of each
+`start_at` release is hardware-stamped; later blocks are derived
+({doc}`api-c-core`). On a block-0 read, `valid_samples` is short by the
+stripped 32-byte tag.
+
+A running, `start_at`-started stream is gated on the scheduler, TX only on
+the ZU11EG; RX gating raises `CapabilityError`:
+
+```python
+sched = dev.scheduler
+t1 = dev.time.now + dev.time.seconds(0.1)
+with dev.tx_stream(channels=[0], cyclic=True) as tx:
+    tx.send(tone)
+    tx.start_at(t1)
+    sched.at(t1 + dev.time.seconds(0.02)).gate_off(tx)   # burst of 20 ms ...
+    sched.at(t1 + dev.time.seconds(0.04)).gate_on(tx)    # ... then resume
+    sched.commit()
+    sched.wait_all()
+```
+
+`gate_on`/`gate_off` on a stream not started with `start_at` raise
+`datax.Error` (`EINVAL`).
+
 ## Error handling idioms
 
 ```python
@@ -147,6 +177,10 @@ try:
 except datax.LateError as e:
     print(e.requested, e.margin)              # explicit, never a shifted capture
 ```
+
+`LateError` is also raised by a later `recv()`/`send()` when the opening
+command of a `start_at` was late at dispatch: the stream has failed and
+the capture never started shifted.
 
 `Capabilities` supports feature-gating without board names:
 
