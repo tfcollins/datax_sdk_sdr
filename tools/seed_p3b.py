@@ -70,6 +70,8 @@ def set_fields(repo, n, vals):
     if DRY:
         return
     _, url = node(repo, n)
+    if "Status" in vals and json.loads(gh("api", f"repos/{OWNER}/{repo}/issues/{n}"))["state"] == "closed":
+        vals = {**vals, "Status": "Done"}  # never reopen a finished task on the board
     q = ('query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){issue(number:$n){'
          'projectItems(first:10){nodes{id project{number}}}}}}')
     nodes = json.loads(gh("api", "graphql", "-f", f"query={q}", "-f", f"o={OWNER}", "-f", f"r={repo}", "-F", f"n={n}"))[
@@ -105,11 +107,11 @@ CODEBASE = {"datax_sdk_sdr": "sdk", "libdatax": "libdatax", "tick": "tick", "vrt
 
 # (key, title, sprint, status, requirement, body, tasks[(repo, title, priority, status, requirement, body)])
 STAGES = [
- ("S0", "P3b S0 — design and API amendments", "Now", "Implementing", "REQ-DOC-001",
+ ("S0", "P3b S0 — design and API amendments", "Now", "Done", "REQ-DOC-001",
   "Write the P3b design, run the builder check, and amend the SDK API pages before any code (REQ-DOC-001).\n\n"
   "Exit: the spec is committed in libdatax, and `streaming-model.md`, `api-c-core.md`, `api-object-model.md` "
   "and `api-python.md` describe the ZU11EG DMA gate, the oneshot tagger and the stop/cancel rule.",
-  [("libdatax", "P3b S0: design spec and builder check", "P1", "Implementing", "",
+  [("libdatax", "P3b S0: design spec and builder check", "P1", "Done", "",
     "Spec: `docs/superpowers/specs/2026-11-23-libdatax-p3b-timed-streams-design.md`. Builder check answered, "
     "and its answers folded into the spec."),
    ("datax_sdk_sdr", "P3b S0: amend the streaming and API pages for DMA-gate timed streams", "P1", "Todo", "REQ-DOC-001",
@@ -119,7 +121,7 @@ STAGES = [
     "- `api-object-model.md`: the capability definitions (decision 8)\n"
     "- `api-python.md`: `start_at`, `recv` timestamps, `gate_on`/`gate_off`, `LateError`\n"
     "- event names follow the code (`DATAX_EVT_STREAM_OVERFLOW`/`UNDERFLOW`)")]),
- ("S1", "P3b S1 — spike gates G1–G6", "Now", "Todo", "",
+ ("S1", "P3b S1 — spike gates G1–G6", "Now", "Implementing", "",
   "Retire the design's risks before committing HDL. Spec section \"Spike gates (S1)\".\n\n"
   "- G1: which image base (hopcap-sfp plus stock TX first, Tick's tron build second); WNS ≥ 0 and netlist checks green\n"
   "- G2: in simulation, the gate in front of cpack with `axi_dmac` (FIFO source, `SYNC_TRANSFER_START`)\n"
