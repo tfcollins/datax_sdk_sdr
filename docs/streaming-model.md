@@ -105,7 +105,9 @@ capability flips.
 `start_at(T)` is "close, arm the DMA, open at T":
 
 1. write execute-now commands that set the direction's mode bit and clear
-   its level (exempt from the guard margin) and wait for their completions;
+   its level (exempt from the guard margin). They are sent unreported:
+   Tick applies an execute-now command when it is pushed, so there is
+   nothing to wait for;
 2. open the IIO buffer and enqueue every RX block, or load the TX data;
 3. commit the opening `STREAM_GATE` at T, late-drop, with a completion.
 

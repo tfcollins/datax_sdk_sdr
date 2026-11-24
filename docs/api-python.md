@@ -157,9 +157,9 @@ the ZU11EG; RX gating raises `CapabilityError`:
 ```python
 sched = dev.scheduler
 t1 = dev.time.now + dev.time.seconds(0.1)
-with dev.tx_stream(channels=[0], cyclic=True) as tx:
-    tx.send(tone)
-    tx.start_at(t1)
+tx = dev.tx_stream(channels=[0], cyclic=True)   # not `with`: entering starts the stream
+tx.send(tone)                  # unstarted TX stream: preloads, transmits nothing
+with tx.start_at(t1):          # start_at returns the stream; `with` then only closes it
     sched.at(t1 + dev.time.seconds(0.02)).gate_off(tx)   # burst of 20 ms ...
     sched.at(t1 + dev.time.seconds(0.04)).gate_on(tx)    # ... then resume
     sched.commit()
@@ -167,7 +167,10 @@ with dev.tx_stream(channels=[0], cyclic=True) as tx:
 ```
 
 `gate_on`/`gate_off` on a stream not started with `start_at` raise
-`datax.Error` (`EINVAL`).
+`datax.Error` (`EINVAL`). `start_at()` returns the stream. Entering a
+`with` block on a stream that is already started does not call `start()`
+again; leaving it still stops and closes the stream. On TX, a closed gate
+mutes: the cyclic buffer keeps playing, time-aligned.
 
 ## Error handling idioms
 

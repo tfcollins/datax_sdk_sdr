@@ -344,15 +344,32 @@ TX sample on the DAC, is the sample at device time T.
 - *Late at dispatch:* if the opening command is late when Tick dispatches
   it, `DATAX_EVT_LATE_COMMAND` is raised, the stream is marked failed and
   `recv`/`send` return `DATAX_ERR_LATE`. The capture never starts shifted.
-- *`stop()` on an armed stream* flushes the pending opening command and
-  forces the gate open (the reset state), then tears down as usual. A
+- *`stop()` on an armed stream* cancels the stream's queued gate commands,
+  the pending opening command included, and forces the gate open (the
+  reset state). It then tears down as usual. Other commands already
+  queued on the scheduler are kept. A
   later `start()` therefore finds the gate open; a later `start_at`
   repeats the sequence. `start()` also forces the gate open first, so a
   crashed earlier process cannot leave it closed.
 - *Latency:* the gate opens a fixed CDC latency after tick T, plus or
   minus one device clock (the tick and device clocks are asynchronous).
-- *Errors:* `-ENOTSUP` without `DATAX_CAP_RX_ARM` / `DATAX_CAP_TX_ARM` for
-  the direction; `-EALREADY` on a started stream.
+- *TX preload:* TX data is loaded before `start_at` by copy-mode
+  `datax_stream_send()` on an **unstarted** TX stream.
+  - It fills up to `block_count` blocks, or one cyclic buffer, and
+    enqueues nothing.
+  - When the blocks are full it returns a partial count, or `-EBUSY` if
+    it took nothing.
+  - `start_at` transmits the preload from T. An untimed `start()`
+    transmits it at once.
+  - `get_block` / `put_block` cannot preload.
+- *Errors:*
+  - `-ENOTSUP` without `DATAX_CAP_RX_ARM` / `DATAX_CAP_TX_ARM` for the
+    direction;
+  - `-ENOTSUP` for TX `start_at` with a partial channel mask on images
+    that restrict it;
+  - `-EINVAL` for TX `start_at` with nothing preloaded ("preload with
+    send() first");
+  - `-EALREADY` on a started stream.
 - *TX:* non-cyclic TX over a network context cannot feed native rates and
   underflows (`DATAX_EVT_STREAM_UNDERFLOW`) after the preloaded blocks
   drain; cyclic TX preloads one buffer and does not.
@@ -360,6 +377,7 @@ TX sample on the DAC, is the sample at device time T.
 **`datax_sched_queue_stream_gate(sched, when, stream, enable)`** — gate a
 running stream on or off on a tick boundary.
 
+- A `when` before the stream's `start_at` T returns `-EINVAL`.
 - The stream must have been started with `start_at`; otherwise it returns
   `-EINVAL` ("stream is not in timed mode; use start_at"), because an
   untimed stream ignores the level.
