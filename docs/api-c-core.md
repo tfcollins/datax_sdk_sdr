@@ -304,10 +304,15 @@ struct datax_block_info {
   returns `-ENOTSUP`):
   - **Block 0 of each release is hardware-stamped.** The release is the
     opening of a `start_at`. libdatax checks the tag's magic and flags,
-    strips the 32-byte header (4 frames at 2 channels, 2 frames at 4
-    channels) and reduces `valid_samples` by that count. The overwritten
-    samples are lost, not shifted. `timestamp_ticks` is the device time
-    of the opening command, in API ticks.
+    strips the 32-byte header as whole frames (`ceil(32 / frame_bytes)`:
+    8, 4 or 2 frames at 2, 4 or 8 converters, and 3 frames at 6) and
+    reduces `valid_samples` by that count. The overwritten samples are
+    lost, not shifted. `timestamp_ticks` is the time of the first
+    returned sample: the opening command's tick plus
+    `(1 + stripped frames) / sample_rate`. The fabric drops the first
+    sample after a gap. A fixed per-image fabric release latency (about
+    18 device clocks on the ZU11EG) comes on top, and the platform page
+    states its measured value.
   - **Later blocks are derived:** `T + round(samples_since_release ×
     tick_hz / sample_rate)`. These are exact only at the device rate;
     the rounding is the caller's to allow for.
@@ -361,8 +366,11 @@ running stream on or off on a tick boundary.
 - Requires `DATAX_CAP_STREAM_GATE`, else `-ENOTSUP`. The usual guard
   margin and late rules of the scheduler apply.
 - **TX gating** (supported on the ZU11EG): a burst is `gate(t1, true)`
-  then `gate(t2, false)`. While closed the DAC outputs zero and the TX
-  FIFO is not read, so a cyclic buffer resumes where it paused.
+  then `gate(t2, false)`. While closed the DAC outputs zero, but the TX
+  FIFO keeps being read: the buffer is muted, not paused, and stays
+  time-aligned. A cyclic buffer resumes at the sample it would have
+  reached anyway. A true pause behind the ZU11EG's DDR `axi_dacfifo`
+  corrupts samples.
 - **RX mid-stream gating returns `-ENOTSUP` on the ZU11EG** ("RX gating
   needs a DMA with end-of-burst (tlast) on this image"): the RX DMA has
   no end-of-burst, so a closing gate cannot end a block, and later

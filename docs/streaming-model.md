@@ -81,12 +81,15 @@ clock-domain crossing.
 - **Reset is open.** With every bit at 0 the image streams exactly like
   the stock design, so an untimed client (iio-oscilloscope, pyadi-iio, a
   P2-era libdatax) sees no difference.
-- **RX gate.** While closed it holds every channel's valid low on the
-  same clock edge, so `util_cpack`'s alignment is untouched. Samples
+- **RX gate.** While closed it holds cpack's write enable low, and only
+  that pin, so the TPL's other consumers are untouched. It also holds
+  cpack in reset, so channel alignment restarts cleanly on opening. Samples
   during a closed gate are discarded in fabric; that is not an overflow.
-- **TX gate.** While closed it stops reading the TX FIFO and drives zeros
-  to the DAC (mid-scale). On reopening, the next sample read is the next
-  sample in the FIFO, so a cyclic buffer resumes where it paused.
+- **TX gate.** Before a `start_at` release it holds the TX FIFO's reads,
+  so the first sample on the DAC is the buffer's first. Later closures
+  **mute**: reads continue and the DAC gets zeros (mid-scale), so a
+  cyclic buffer stays time-aligned. A true pause behind the DDR
+  `axi_dacfifo` corrupts samples (spike G2, 2026-11-24).
 - **Tagger.** Tick's `tick_stream_timestamp_tag`, in oneshot mode behind a
   FIFO-interface adapter, overwrites the first 32 bytes of RX block 0 of
   each release with a header carrying the tick latched when the opening
