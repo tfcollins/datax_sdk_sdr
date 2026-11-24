@@ -193,7 +193,7 @@ STAGES = [
   [("libdatax", "P3b S4: timed-dma entry in images.json, tron-run.sh and the hw-test.yml image option", "P1", "Todo", "REQ-TEST-024",
     "A new boot set pinned by hash. A `p3b` marker skips the suite on every other image. Workflow input `image` gains `timed-dma`."),
    ("libdatax", "P3b S4: p3b suite (timed capture, loopback alignment, gated burst, chip-B hop)", "P1", "Todo", "REQ-TEST-022, REQ-TEST-023",
-    "Timed capture: the header equals T, and so does `edge_capture_ticks`. Loopback: TX and RX start_at at the same T, with the first-sample offset identical within ±1 sample over 10 runs. "
+    "Timed capture: block 0 timestamp_ticks equals T + (1 + stripped frames)/fs, and `edge_capture_ticks` equals T. Loopback: TX and RX start_at at the same T, with the first-sample offset identical within ±1 sample over 10 runs. "
     "Gated burst: TX gates a tone on/off/on at 20 ms, and the edges in the continuous RX stream land at the commanded times plus the loopback offset, ±1 sample. Chip B: a timed tune with PLL readback. Evidence JSON."),
    ("libdatax", "P3b S4: P2 and P3a regression on the timed-dma image", "P1", "Todo", "REQ-TEST-021",
     "The full P2 suite, with TX running on this image, plus the P3a suite. Throughput and overflows are recorded, not asserted.")]),
