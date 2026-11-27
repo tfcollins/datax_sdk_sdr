@@ -5,10 +5,10 @@
     "tick": {
       "repository": "tfcollins/tick",
       "branch": "main",
-      "revision": "aeb175faeb01385aba147bda59e450c97723eb34",
+      "revision": "c7bd6d659ca1e2c51b89264de105be42063cbb15",
       "path": "support.json",
       "private": true,
-      "why": "main after support-manifest PR #36 merged"
+      "why": "main after #49 (ADRV9361-Z7035 target, integration-artifacts rows) and #51"
     },
     "vrt49": {
       "repository": "tfcollins/vrt49",
